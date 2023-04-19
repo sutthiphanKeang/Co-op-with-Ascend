@@ -29,9 +29,8 @@ function Register() {
   const handleSubmit = () => {
     localStorage.setItem("user", JSON.stringify(values));
     alert("Register Succeed");
-    useEffect(() => {
-      navigate("/Login");
-    },[]);
+    navigate("/Login");
+    
   };
   return (
     <Form>

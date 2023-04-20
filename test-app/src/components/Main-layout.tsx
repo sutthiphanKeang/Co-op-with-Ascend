@@ -9,7 +9,7 @@ function MainLayout() {
   return (
     <div>
       <Navbar/>
-      <Card style={{margin:20, padding:20}}>
+      <Card style={{margin:20, padding:20, border:0}}>
         <Outlet/>
       </Card>
     </div>

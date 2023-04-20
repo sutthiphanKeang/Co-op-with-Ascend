@@ -6,11 +6,14 @@ import Container from "react-bootstrap/Container";
 import Navbar from "./Navbar";
 import Card from 'react-bootstrap/Card';
 function MainLayout() {
+  const [onLoginuser, setonLoginuser] = useState(
+    false
+  );
   return (
     <div>
-      <Navbar/>
+      <Navbar onLoginuser={onLoginuser} setonLoginuser={setonLoginuser}/>
       <Card style={{margin:20, padding:20, border:0}}>
-        <Outlet/>
+        <Outlet context={[onLoginuser, setonLoginuser]}/>
       </Card>
     </div>
   );

@@ -3,12 +3,21 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import { useNavigate, useOutletContext } from "react-router-dom";
 
+//i18n
+import { useTranslation} from "react-i18next";
+
+////
 interface State {
   email: string;
   password: string;
 }
 
 function Login() {
+
+  //i18n
+  const{t} = useTranslation();
+  ///
+
   const navigate = useNavigate();
 
   const [onLoginuser, setonLoginuser] = useOutletContext<any>();
@@ -31,7 +40,7 @@ function Login() {
       const password = JSON.parse(
         localStorage.getItem("user") ?? ' { "password": "" }'
       ).password;
-      if (values.email == email && values.password == password) {
+      if (values.email === email && values.password === password) {
         alert("Login Succeed");
         setonLoginuser(true);
         navigate("/User");
@@ -47,7 +56,7 @@ function Login() {
   return (
     <Form>
       <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-        <Form.Label>Email address</Form.Label>
+        <Form.Label>{t('email')}</Form.Label>
         <Form.Control
           type="email"
           placeholder="name@example.com"
@@ -57,16 +66,15 @@ function Login() {
       </Form.Group>
 
       <Form.Group className="mb-3" controlId="formBasicPassword">
-        <Form.Label>Password</Form.Label>
+        <Form.Label>{t('Password')}</Form.Label>
         <Form.Control
           type="password"
-          placeholder="Password"
           value={values.password}
           onChange={handleChange("password")}
         />
       </Form.Group>
       <Button variant="primary" type="submit" onClick={handleSubmit}>
-        Submit
+        {t('Submit')}
       </Button>
     </Form>
   );

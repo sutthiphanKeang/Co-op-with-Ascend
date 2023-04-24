@@ -5,6 +5,10 @@ import Col from "react-bootstrap/Col";
 import { useEffect, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 
+//i18n
+import { useTranslation} from "react-i18next";
+
+
 interface State {
   fname: string;
   lname: string;
@@ -14,6 +18,11 @@ interface State {
 }
 
 function Register() {
+
+  //i18n
+  const{t} = useTranslation();
+  ///
+
   const [values, setValues] = useState({
     fname: "",
     lname: "",
@@ -36,7 +45,7 @@ function Register() {
     <Form>
       <Row className="mb-3">
         <Form.Group as={Col} md="4">
-          <Form.Label>First name</Form.Label>
+          <Form.Label>{t('fname')}</Form.Label>
           <Form.Control
             type="text"
             value={values.fname}
@@ -44,7 +53,7 @@ function Register() {
           />
         </Form.Group>
         <Form.Group as={Col} md="4">
-          <Form.Label>Last name</Form.Label>
+          <Form.Label>{t('lname')}</Form.Label>
           <Form.Control
             type="text"
             value={values.lname}
@@ -52,7 +61,7 @@ function Register() {
           />
         </Form.Group>
         <Form.Group as={Col} md="4">
-          <Form.Label>Phone No.</Form.Label>
+          <Form.Label>{t('phone')}</Form.Label>
           <Form.Control
             type="text"
             value={values.phone}
@@ -61,7 +70,7 @@ function Register() {
         </Form.Group>
       </Row>
       <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-        <Form.Label>Email address</Form.Label>
+        <Form.Label>{t('email')}</Form.Label>
         <Form.Control
           type="email"
           placeholder="name@example.com"
@@ -71,16 +80,15 @@ function Register() {
       </Form.Group>
 
       <Form.Group className="mb-3" controlId="formBasicPassword">
-        <Form.Label>Password</Form.Label>
+        <Form.Label>{t('Password')}</Form.Label>
         <Form.Control
           type="password"
-          placeholder="Password"
           value={values.password}
           onChange={handleChange("password")}
         />
       </Form.Group>
       <Button variant="primary" type="submit" onClick={handleSubmit}>
-        Submit
+        {t('Submit')}
       </Button>
     </Form>
   );

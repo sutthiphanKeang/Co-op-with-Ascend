@@ -1,29 +1,46 @@
+import { useEffect } from "react";
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import NavDropdown from "react-bootstrap/NavDropdown";
+
+import { useTranslation} from "react-i18next";
 
 type props = {
   onLoginuser: boolean;
   setonLoginuser: (a: boolean) => void;
 };
 
+
+
+const lngs = {
+  en: {nativeName: 'English'},
+  th: {nativeName: 'Thai'}
+}
+
 function NavbarUser({ onLoginuser, setonLoginuser }: props) {
-  console.log(onLoginuser);
+  //i18n
+  const{t, i18n} = useTranslation();
+
+
   return (
     <Navbar collapseOnSelect expand="lg" bg="primary" variant="dark">
       <Container>
         <Navbar.Brand href="#home">Test-App</Navbar.Brand>
-
+        <Nav>
         {!onLoginuser && (
-          <Nav>
-            <Nav.Link href="Login">Login</Nav.Link>
-            <Nav.Link href="Register">Register</Nav.Link>
-          </Nav>
-        )}
+          <>
+          <Nav.Link href="Login">{t('Login')}</Nav.Link>
+          <Nav.Link href="Register">{t('Register')}</Nav.Link>
+        
+          </>
+          
+      )}
+        
+        
         {onLoginuser && (
-          <Nav>
-            <Nav.Link href="User">My Account</Nav.Link>
+          <>
+            <Nav.Link href="User">{t('Account')}</Nav.Link>
             <Nav.Link
               href="Login"
               onClick={() => {
@@ -31,10 +48,17 @@ function NavbarUser({ onLoginuser, setonLoginuser }: props) {
                 alert("Logout Succeed");
               }}
             >
-              Logout
+              {t('Logout')}
             </Nav.Link>
-          </Nav>
+          </>
         )}
+        <NavDropdown title={t('Language')} id="navbarScrollingDropdown">
+              {Object.keys(lngs).map((lng) => (
+                <NavDropdown.Item onClick={() => i18n.changeLanguage(lng)} disabled={i18n.resolvedLanguage === lng}>{lngs[lng as keyof typeof lngs].nativeName}</NavDropdown.Item>
+              ))}
+            </NavDropdown>
+        </Nav>
+        
       </Container>
     </Navbar>
   );

@@ -1,0 +1,17 @@
+{
+    "Login": "Login",
+    "Register": "Register",
+    "Account": "My account",
+    "Logout": "Logout",
+    "Language": "Language",
+    "email": "Email address",
+    "Password": "Password",
+    "fname": "First name",
+    "lname": "Last name",
+    "phone": "Phone No.",
+    "Submit": "Submit",
+    "Edit": "Edit account",
+    "Delete": "Delete Account",
+    "Close": "Close",
+    "Save":" Save Changes"
+}

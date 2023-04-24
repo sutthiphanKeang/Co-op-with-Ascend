@@ -8,10 +8,23 @@
     "Password": "Password",
     "fname": "First name",
     "lname": "Last name",
-    "phone": "Phone No.",
+    "phone": "Phone no.",
     "Submit": "Submit",
     "Edit": "Edit account",
     "Delete": "Delete Account",
     "Close": "Close",
-    "Save":" Save Changes"
+    "Save":" Save Changes",
+
+    "agree": "Agree to terms and conditions",
+    "error_agree": "Terms must be accepted",
+
+    "error_fname": "Please Enter your first name",
+    "error_lname": "Please Enter your last name",
+    "error_phone_min": "Phone no. must be at least 10 characters",
+    "error_phone_max":"phone must be at most 10 characters",
+    "error_phone": "Please Enter your phone no.",
+    "error_email_valid": "Email must be a valid email",
+    "error_email": "Please Enter your email",
+    "error_password_min": "Password must be at least 4 characters",
+    "error_password": "Please Enter your password"
 }

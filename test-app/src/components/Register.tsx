@@ -11,7 +11,6 @@ import { Formik, FormikHelpers } from "formik";
 
 //i18n
 import { useTranslation } from "react-i18next";
-import { render } from "@testing-library/react";
 
 interface State {
   fname: string;
@@ -79,30 +78,34 @@ function Register() {
   // };
 
   const myhandleSubmit = (values: State) => {
-    // console.log(values);
+    console.log(values);
     // setValues(values);
     alert("Register Succeed");
     localStorage.setItem("user", JSON.stringify(values));
     navigate("/Login");
   };
-    
-  
-
 
   return (
-
     <Formik
       validationSchema={schema}
       onSubmit={myhandleSubmit}
-      initialValues={{fname: "",
-      lname: "",
-      phone: "0",
-      email: "",
-      password: "",
-      terms: false,}}
-      
+      initialValues={{
+        fname: "",
+        lname: "",
+        phone: "",
+        email: "",
+        password: "",
+        terms: false,
+      }}
     >
-      {({handleSubmit, handleChange, values , touched, isValid, errors }) => (
+      {({
+        handleSubmit,
+        handleChange,
+        values,
+        touched,
+        isValid,
+        errors,
+      }) => (
         <Form noValidate onSubmit={handleSubmit}>
           <Row className="mb-5">
             <Form.Group as={Col} md="4" className="position-relative">
@@ -181,6 +184,7 @@ function Register() {
               onChange={handleChange("password")}
               isValid={touched.password && !errors.password}
               isInvalid={!!errors.password}
+              
             />
             <Form.Control.Feedback type="valid"></Form.Control.Feedback>
             <Form.Control.Feedback type="invalid" tooltip>
@@ -189,14 +193,13 @@ function Register() {
           </Form.Group>
           <Form.Group className="position-relative mb-5">
             <Form.Check
-              required
+              
               name="terms"
               label={t("agree")}
               onChange={handleChange("terms")}
               isInvalid={!!errors.terms}
               feedback={t(`${errors.terms}`)}
               feedbackType="invalid"
-              id="validationFormik106"
               feedbackTooltip
             />
           </Form.Group>
@@ -208,6 +211,5 @@ function Register() {
     </Formik>
   );
 }
-
 
 export default Register;

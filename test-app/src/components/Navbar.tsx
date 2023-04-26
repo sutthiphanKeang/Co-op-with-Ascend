@@ -54,7 +54,7 @@ function NavbarUser({ onLoginuser, setonLoginuser }: props) {
         )}
         <NavDropdown title={t('Language')} id="navbarScrollingDropdown">
               {Object.keys(lngs).map((lng) => (
-                <NavDropdown.Item onClick={() => i18n.changeLanguage(lng)} disabled={i18n.resolvedLanguage === lng}>{lngs[lng as keyof typeof lngs].nativeName}</NavDropdown.Item>
+                <NavDropdown.Item key = "{lng}" onClick={() => i18n.changeLanguage(lng)} disabled={i18n.resolvedLanguage === lng}>{lngs[lng as keyof typeof lngs].nativeName}</NavDropdown.Item>
               ))}
             </NavDropdown>
         </Nav>

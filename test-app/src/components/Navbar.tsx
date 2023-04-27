@@ -26,7 +26,7 @@ function NavbarUser({ onLoginuser, setonLoginuser }: props) {
   return (
     <Navbar collapseOnSelect expand="lg" bg="primary" variant="dark">
       <Container>
-        <Navbar.Brand href="#home">Test-App</Navbar.Brand>
+        <Navbar.Brand href="/">Test-App</Navbar.Brand>
         <Nav>
         {!onLoginuser && (
           <>

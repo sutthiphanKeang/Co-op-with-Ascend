@@ -1,0 +1,99 @@
+package com.example.test.controller;
+
+import com.example.test.mapper.InvoiceDto;
+import com.example.test.model.Invoice;
+import com.example.test.model.User;
+import com.example.test.repository.InvoiceRepository;
+import com.example.test.repository.UserRepository;
+import com.example.test.service.InvoiceService;
+import com.example.test.service.UserService;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/api")
+public class InvoiceController {
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+    @Autowired
+    InvoiceService invoiceService;
+
+    @GetMapping("/invoice")
+    public ResponseEntity<List<Invoice>> getAllInvoice() {
+        try {
+            if (invoiceService.getInvoice().isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity<>(invoiceService.getInvoice(), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/invoice/{id}")
+    public ResponseEntity<Invoice> getInvoiceById(@PathVariable("id") long id) {
+        try {
+            Optional<Invoice> invoiceData = invoiceService.getInvoice(id);
+            if (!invoiceData.isEmpty()) {
+                return new ResponseEntity<>(invoiceData.get(), HttpStatus.OK);
+            }else{
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/invoice/{useId}")
+    public ResponseEntity<Invoice> createInvoice(@PathVariable("useId") Long userId, @RequestBody InvoiceDto invoiceDto) {
+            Invoice invoice = modelMapper.map(invoiceDto, Invoice.class);
+            Invoice invoicePost = invoiceService.createInvoice(invoice, userId);
+            if(invoicePost != null){
+                return new ResponseEntity<>(invoicePost, HttpStatus.CREATED);
+            }
+            else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+    }
+
+    @PutMapping("/invoice/{id}")
+    public ResponseEntity<Invoice> updateInvoice(@PathVariable("id") long id, @RequestBody InvoiceDto invoiceDto) {
+
+            Optional<Invoice> invoiceData = invoiceService.getInvoice(id);
+
+            if (invoiceData.isPresent()) {
+//
+//                modelMapper.map(invoiceDto, invoice);
+                invoiceData.get().setUnit(invoiceDto.getUnit());
+                invoiceData.get().setStatus(invoiceDto.getStatus());
+                Optional<Invoice> invoicePut = invoiceService.updateInvoice(id, invoiceData.get());
+                return new ResponseEntity<>(invoicePut.get(), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+
+    }
+
+    @DeleteMapping("/invoice/{id}")
+    public ResponseEntity<HttpStatus> deleteInvoice(@PathVariable("id") long id) {
+        try {
+            if (invoiceService.deleteInvoice(id)) {
+                return new ResponseEntity<>(HttpStatus.GONE);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+}

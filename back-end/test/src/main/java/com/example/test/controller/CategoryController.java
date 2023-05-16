@@ -6,6 +6,8 @@ import com.example.test.model.User;
 import com.example.test.repository.CategoryRepository;
 import com.example.test.repository.InvoiceRepository;
 import com.example.test.repository.ProductRepository;
+import com.example.test.service.CategoryService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,40 +23,29 @@ import java.util.UUID;
 public class CategoryController {
 
     @Autowired
-    CategoryRepository CategoryRepository;
+    private ModelMapper modelMapper;
 
     @Autowired
-    ProductRepository ProductRepository;
-
-    @Autowired
-    InvoiceRepository InvoiceRepository;
+    private CategoryService categoryService;
 
     @GetMapping("/category")
-    public ResponseEntity<List<Category>> getAllCategory(@RequestParam(required = false) UUID id) {
+    public ResponseEntity<List<Category>> getAllCategory() {
         try {
-            List<Category> categories = new ArrayList<Category>();
-
-            if (id == null)
-                CategoryRepository.findAll().forEach(categories::add);
-            if (categories.isEmpty()) {
+            if (categoryService.getCategory().isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-
-            return new ResponseEntity<>(categories, HttpStatus.OK);
+            return new ResponseEntity<>(categoryService.getCategory(), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/category/{id}")
-    public ResponseEntity<Category> getCategoryById(@PathVariable("id") long id) {
+    public ResponseEntity<Category> getCategoryById(@PathVariable("id") UUID id) {
         try {
-            List<Category> CategoryData1 = CategoryRepository.findByInvoice(id);
-            List<Category> CategoryData2 = CategoryRepository.findByProduct(id);
-            if (!CategoryData1.isEmpty()) {
-                return new ResponseEntity<>(CategoryData1.get(0), HttpStatus.OK);
-            } else if (!CategoryData2.isEmpty()) {
-                return new ResponseEntity<>(CategoryData2.get(0), HttpStatus.OK);
+            Optional<Category> categoryData = categoryService.getCategory(id);
+            if (categoryData.isPresent()) {
+                return new ResponseEntity<>(categoryData.get(), HttpStatus.OK);
             } else{
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
@@ -64,14 +55,12 @@ public class CategoryController {
         }
     }
 
-    @PostMapping("/category")
-    public ResponseEntity<Category> createCategory(@RequestBody Category NewCategory) {
+    @PostMapping("/category/{invoiceId}/{productId}")
+    public ResponseEntity<Category> createCategory(@PathVariable("invoiceId") long invoiceId, @PathVariable("productId") long productId) {
         try {
-            Optional<Invoice> invoice = InvoiceRepository.findById(NewCategory.getInvoice().getId());
-            Optional<Product> product = ProductRepository.findById(NewCategory.getProduct().getId());
-            if(!invoice.isEmpty() && !product.isEmpty()){
-                Category category = CategoryRepository.save(NewCategory);
-                return new ResponseEntity<>(category, HttpStatus.CREATED);
+            Category categoryPost = categoryService.createCategory(invoiceId, productId);
+            if(categoryPost != null){
+                return new ResponseEntity<>(invoicePost, HttpStatus.CREATED);
             }
             else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -81,29 +70,10 @@ public class CategoryController {
         }
     }
 
-//    @PutMapping("/category/{id}")
-//    public ResponseEntity<Category> updateCategory(@PathVariable("id") long id, @RequestBody Category putCategory) {
-//        try {
-//            Optional<Category> CategoryData = CategoryRepository.findById(id);
-//
-//            if (CategoryData.isPresent()) {
-//                Category category = CategoryData.get();
-//                category.setProduct(putCategory.getProduct().getId());
-//                return new ResponseEntity<>(CategoryRepository.save(putCategory), HttpStatus.OK);
-//            } else {
-//                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//            }
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
-
     @DeleteMapping("/category/{id}")
     public ResponseEntity<HttpStatus> deleteCategory(@PathVariable("id") UUID id) {
         try {
-            Optional<Category> CategoryData = CategoryRepository.findById(id);
-            if (CategoryData.isPresent()) {
-                CategoryRepository.deleteById(id);
+            if (categoryService.deleteCategory(id)) {
                 return new ResponseEntity<>(HttpStatus.GONE);
             } else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -112,16 +82,4 @@ public class CategoryController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-    @DeleteMapping("/category/all")
-    public ResponseEntity<HttpStatus> deleteAllCategory() {
-        try {
-            CategoryRepository.deleteAll();
-            return new ResponseEntity<>(HttpStatus.GONE);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-    }
-
 }

@@ -22,9 +22,6 @@ import java.util.Optional;
 public class InvoiceController {
 
     @Autowired
-    private ModelMapper modelMapper;
-
-    @Autowired
     InvoiceService invoiceService;
 
     @GetMapping("/invoice")
@@ -43,7 +40,7 @@ public class InvoiceController {
     public ResponseEntity<Invoice> getInvoiceById(@PathVariable("id") long id) {
         try {
             Optional<Invoice> invoiceData = invoiceService.getInvoice(id);
-            if (!invoiceData.isEmpty()) {
+            if (invoiceData.isPresent()) {
                 return new ResponseEntity<>(invoiceData.get(), HttpStatus.OK);
             }else{
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -55,25 +52,26 @@ public class InvoiceController {
     }
 
     @PostMapping("/invoice/{useId}")
-    public ResponseEntity<Invoice> createInvoice(@PathVariable("useId") Long userId, @RequestBody InvoiceDto invoiceDto) {
-            Invoice invoice = modelMapper.map(invoiceDto, Invoice.class);
-            Invoice invoicePost = invoiceService.createInvoice(invoice, userId);
+    public ResponseEntity<Invoice> createInvoice(@PathVariable("useId") Long userId) {
+        try {
+            Invoice invoicePost = invoiceService.createInvoice(userId);
             if(invoicePost != null){
                 return new ResponseEntity<>(invoicePost, HttpStatus.CREATED);
             }
             else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PutMapping("/invoice/{id}")
     public ResponseEntity<Invoice> updateInvoice(@PathVariable("id") long id, @RequestBody InvoiceDto invoiceDto) {
-
+        try {
             Optional<Invoice> invoiceData = invoiceService.getInvoice(id);
 
             if (invoiceData.isPresent()) {
-//
-//                modelMapper.map(invoiceDto, invoice);
                 invoiceData.get().setUnit(invoiceDto.getUnit());
                 invoiceData.get().setStatus(invoiceDto.getStatus());
                 Optional<Invoice> invoicePut = invoiceService.updateInvoice(id, invoiceData.get());
@@ -81,7 +79,9 @@ public class InvoiceController {
             } else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
-
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @DeleteMapping("/invoice/{id}")

@@ -27,14 +27,14 @@ public class InvoiceService {
         return invoiceRepository.findById(id);
     }
 
-    public Invoice createInvoice(Invoice invoice, Long user_id) {
+    public Invoice createInvoice(Long user_id) {
         Optional<User> user = userRepository.findById(user_id);
+        Invoice invoice = new Invoice();
         if(user.isEmpty()){
             return null;
         }
         invoice.setUser(user.get());
         return invoiceRepository.save(invoice);
-
     }
 
     public Optional<Invoice> updateInvoice(Long id, Invoice invoice) {

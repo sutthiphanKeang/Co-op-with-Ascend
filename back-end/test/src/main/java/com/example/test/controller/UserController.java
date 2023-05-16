@@ -39,7 +39,7 @@ public class UserController {
     public ResponseEntity<User> getUserById(@PathVariable("id") long id) {
         try {
             Optional<User> userData = userService.getUser(id);
-        if (!userData.isEmpty()) {
+        if (userData.isPresent()) {
             return new ResponseEntity<>(userData.get(), HttpStatus.OK);
         }else{
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -65,7 +65,6 @@ public class UserController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    //test
 
     @PutMapping("/user/{id}")
     public ResponseEntity<User> updateUser(@PathVariable("id") long id, @RequestBody UserDto userDto) {

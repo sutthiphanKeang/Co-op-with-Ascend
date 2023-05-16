@@ -1,8 +1,10 @@
 package com.example.test.controller;
 
+import com.example.test.exceptions.GlobalExceptionHandler;
 import com.example.test.mapper.UserDto;
 import com.example.test.model.User;
 import com.example.test.service.UserService;
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
+@ControllerAdvice(basePackageClasses = GlobalExceptionHandler.class)
 public class UserController {
 
     @Autowired
@@ -51,7 +54,7 @@ public class UserController {
     }
 
     @PostMapping("/user")
-    public ResponseEntity<User> createUser(@RequestBody UserDto userDto) {
+    public ResponseEntity<User> createUser(@Valid @RequestBody UserDto userDto) {
         try {
             User user = modelMapper.map(userDto, User.class);
             user.setF_name(userDto.getF_name());
@@ -67,7 +70,7 @@ public class UserController {
     }
 
     @PutMapping("/user/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable("id") long id, @RequestBody UserDto userDto) {
+    public ResponseEntity<User> updateUser(@Valid @PathVariable("id") long id, @RequestBody UserDto userDto) {
         try {
             Optional<User> userData = userService.getUser(id);
 

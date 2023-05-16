@@ -36,10 +36,9 @@ public class CategoryService {
         return categoryRepository.findById(id);
     }
 
-    public Category createCategory(Long invoiceId, Long productId) {
+    public Category createCategory(Long invoiceId, Long productId, Category category) {
         Optional<Product> product = productRepository.findById(productId);
         Optional<Invoice> invoice = invoiceRepository.findById(invoiceId);
-        Category category = new Category();
         if(product.isEmpty() || invoice.isEmpty()){
             return null;
         }

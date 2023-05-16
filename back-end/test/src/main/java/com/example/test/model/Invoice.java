@@ -32,7 +32,4 @@ public class Invoice {
     @Column(name = "status")
     private Boolean status;
 
-    @Column(name = "unit")
-    private Integer unit;
-
 }

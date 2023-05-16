@@ -1,5 +1,6 @@
 package com.example.test.controller;
 
+import com.example.test.exceptions.GlobalExceptionHandler;
 import com.example.test.mapper.InvoiceDto;
 import com.example.test.model.Invoice;
 import com.example.test.model.User;
@@ -7,6 +8,7 @@ import com.example.test.repository.InvoiceRepository;
 import com.example.test.repository.UserRepository;
 import com.example.test.service.InvoiceService;
 import com.example.test.service.UserService;
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +21,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
+@ControllerAdvice(basePackageClasses = GlobalExceptionHandler.class)
 public class InvoiceController {
 
     @Autowired
@@ -52,7 +55,7 @@ public class InvoiceController {
     }
 
     @PostMapping("/invoice/{useId}")
-    public ResponseEntity<Invoice> createInvoice(@PathVariable("useId") Long userId) {
+    public ResponseEntity<Invoice> createInvoice(@Valid @PathVariable("useId") Long userId) {
         try {
             Invoice invoicePost = invoiceService.createInvoice(userId);
             if(invoicePost != null){
@@ -67,12 +70,11 @@ public class InvoiceController {
     }
 
     @PutMapping("/invoice/{id}")
-    public ResponseEntity<Invoice> updateInvoice(@PathVariable("id") long id, @RequestBody InvoiceDto invoiceDto) {
+    public ResponseEntity<Invoice> updateInvoice(@Valid @PathVariable("id") long id, @RequestBody InvoiceDto invoiceDto) {
         try {
             Optional<Invoice> invoiceData = invoiceService.getInvoice(id);
 
             if (invoiceData.isPresent()) {
-                invoiceData.get().setUnit(invoiceDto.getUnit());
                 invoiceData.get().setStatus(invoiceDto.getStatus());
                 Optional<Invoice> invoicePut = invoiceService.updateInvoice(id, invoiceData.get());
                 return new ResponseEntity<>(invoicePut.get(), HttpStatus.OK);

@@ -1,4 +1,7 @@
 package com.example.test.controller;
+import com.example.test.exceptions.GlobalExceptionHandler;
+import com.example.test.mapper.CategoryDto;
+import com.example.test.mapper.InvoiceDto;
 import com.example.test.model.Category;
 import com.example.test.model.Invoice;
 import com.example.test.model.Product;
@@ -7,6 +10,7 @@ import com.example.test.repository.CategoryRepository;
 import com.example.test.repository.InvoiceRepository;
 import com.example.test.repository.ProductRepository;
 import com.example.test.service.CategoryService;
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +24,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
+@ControllerAdvice(basePackageClasses = GlobalExceptionHandler.class)
 public class CategoryController {
 
     @Autowired
@@ -56,9 +61,11 @@ public class CategoryController {
     }
 
     @PostMapping("/category/{invoiceId}/{productId}")
-    public ResponseEntity<Category> createCategory(@PathVariable("invoiceId") long invoiceId, @PathVariable("productId") long productId) {
+    public ResponseEntity<Category> createCategory(@Valid @PathVariable("invoiceId") long invoiceId, @PathVariable("productId") long productId, @RequestBody CategoryDto categoryDto) {
         try {
-            Category categoryPost = categoryService.createCategory(invoiceId, productId);
+            Category category = modelMapper.map(categoryDto, Category.class);
+            category.setUnit(categoryDto.getUnit());
+            Category categoryPost = categoryService.createCategory(invoiceId, productId, category);
             if(categoryPost != null){
                 return new ResponseEntity<>(categoryPost, HttpStatus.CREATED);
             }

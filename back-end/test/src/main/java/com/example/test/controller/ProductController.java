@@ -1,10 +1,12 @@
 package com.example.test.controller;
 
+import com.example.test.exceptions.GlobalExceptionHandler;
 import com.example.test.mapper.ProductDto;
 import com.example.test.model.Product;
 import com.example.test.model.User;
 import com.example.test.repository.ProductRepository;
 import com.example.test.service.ProductService;
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
+@ControllerAdvice(basePackageClasses = GlobalExceptionHandler.class)
 public class ProductController {
     @Autowired
     private ModelMapper modelMapper;
@@ -53,7 +56,7 @@ public class ProductController {
     }
 
     @PostMapping("/product")
-    public ResponseEntity<Product> createProduct(@RequestBody ProductDto productDto) {
+    public ResponseEntity<Product> createProduct(@Valid @RequestBody ProductDto productDto) {
         try {
             Product products = modelMapper.map(productDto, Product.class);
             products.setName(products.getName());
@@ -66,7 +69,7 @@ public class ProductController {
     }
 
     @PutMapping("/product/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable("id") long id, @RequestBody ProductDto productDto) {
+    public ResponseEntity<Product> updateProduct(@Valid @PathVariable("id") long id, @RequestBody ProductDto productDto) {
         try {
             Optional<Product> ProductData = productService.getProduct(id);
 

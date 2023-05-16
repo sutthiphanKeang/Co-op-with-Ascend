@@ -16,12 +16,15 @@ public class Category {
     @Column(name = "id")
     private UUID id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     @JoinColumn(name = "invoice_id")
     private Invoice invoice;
 
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     @JoinColumn(name = "product_id")
     private  Product product;
+
+    @Column(name = "unit")
+    private Integer unit;
 }

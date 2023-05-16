@@ -60,7 +60,7 @@ public class CategoryController {
         try {
             Category categoryPost = categoryService.createCategory(invoiceId, productId);
             if(categoryPost != null){
-                return new ResponseEntity<>(invoicePost, HttpStatus.CREATED);
+                return new ResponseEntity<>(categoryPost, HttpStatus.CREATED);
             }
             else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);

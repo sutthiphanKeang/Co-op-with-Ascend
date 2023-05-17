@@ -44,7 +44,6 @@ function Home() {
             return response.data;
           })
           .then((data2) => {
-            // console.log(data2.sprites.front_default);
             setImage(data2.sprites.front_default);
           })
           .catch((error) => {

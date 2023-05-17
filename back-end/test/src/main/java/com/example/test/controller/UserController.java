@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,9 +56,9 @@ public class UserController {
     public ResponseEntity<User> createUser(@Valid @RequestBody UserDto userDto) {
         try {
             User user = modelMapper.map(userDto, User.class);
-            user.setF_name(userDto.getF_name());
-            user.setL_name(userDto.getL_name());
-            user.setPhone_no(userDto.getPhone_no());
+            user.setFName(userDto.getFName());
+            user.setLName(userDto.getLName());
+            user.setPhoneNo(userDto.getPhoneNo());
             user.setEmail(userDto.getEmail());
             user.setPassword(userDto.getPassword());
             User userPost = userService.createUser(user);
@@ -76,9 +75,9 @@ public class UserController {
 
         if (userData.isPresent()) {
             User user = modelMapper.map(userDto, User.class);
-            user.setF_name(userDto.getF_name());
-            user.setL_name(userDto.getL_name());
-            user.setPhone_no(userDto.getPhone_no());
+            user.setFName(userDto.getFName());
+            user.setLName(userDto.getLName());
+            user.setPhoneNo(userDto.getPhoneNo());
             user.setEmail(userDto.getEmail());
             user.setPassword(userDto.getPassword());
             Optional<User> userPut = userService.updateUser(id, user);

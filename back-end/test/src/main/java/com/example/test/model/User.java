@@ -2,6 +2,7 @@ package com.example.test.model;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -28,16 +29,18 @@ public class User {
     private Set<Invoice> invoices;
 
     @Column(name = "f_name")
-    private String f_name;
+    @JsonProperty("f_name")
+    private String fName;
 
     @Column(name = "l_name")
-    private String l_name;
+    @JsonProperty("l_name")
+    private String lName;
 
     @Column(name = "email")
     private String email;
 
     @Column(name = "phone_no")
-    private String phone_no;
+    private String phoneNo;
 
     @Column(name = "password")
     private String password;

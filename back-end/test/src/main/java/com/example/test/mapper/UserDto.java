@@ -18,17 +18,17 @@ public class UserDto {
     private Set<Invoice> invoices;
 
     @NotEmpty(message = "First name is required")
-    private String f_name;
+    private String fName;
 
     @NotEmpty(message = "Last name is required")
-    private String l_name;
+    private String lName;
 
     @NotEmpty(message = "Email is required")
     @Email(message = "Invalid email format")
     private String email;
 
     @NotEmpty(message = "Phone number is required")
-    private String phone_no;
+    private String phoneNo;
 
     @NotEmpty(message = "Password is required")
     private String password;

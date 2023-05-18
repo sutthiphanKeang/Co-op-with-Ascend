@@ -3,19 +3,13 @@ package com.example.test.controller;
 import com.example.test.exceptions.GlobalExceptionHandler;
 import com.example.test.mapper.InvoiceDto;
 import com.example.test.model.Invoice;
-import com.example.test.model.User;
-import com.example.test.repository.InvoiceRepository;
-import com.example.test.repository.UserRepository;
 import com.example.test.service.InvoiceService;
-import com.example.test.service.UserService;
 import jakarta.validation.Valid;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,7 +39,7 @@ public class InvoiceController {
             Optional<Invoice> invoiceData = invoiceService.getInvoice(id);
             if (invoiceData.isPresent()) {
                 return new ResponseEntity<>(invoiceData.get(), HttpStatus.OK);
-            }else{
+            } else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
 
@@ -58,10 +52,9 @@ public class InvoiceController {
     public ResponseEntity<Invoice> createInvoice(@Valid @PathVariable("useId") Long userId) {
         try {
             Invoice invoicePost = invoiceService.createInvoice(userId);
-            if(invoicePost != null){
+            if (invoicePost != null) {
                 return new ResponseEntity<>(invoicePost, HttpStatus.CREATED);
-            }
-            else {
+            } else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
         } catch (Exception e) {
@@ -76,8 +69,8 @@ public class InvoiceController {
 
             if (invoiceData.isPresent()) {
                 invoiceData.get().setStatus(invoiceDto.getStatus());
-                Optional<Invoice> invoicePut = invoiceService.updateInvoice(id, invoiceData.get());
-                return new ResponseEntity<>(invoicePut.get(), HttpStatus.OK);
+                Invoice invoicePut = invoiceService.updateInvoice(id, invoiceData.get());
+                return new ResponseEntity<>(invoicePut, HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }

@@ -5,22 +5,18 @@ import com.example.test.mapper.UserDto;
 import com.example.test.model.User;
 import com.example.test.service.UserService;
 import jakarta.validation.Valid;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
 @ControllerAdvice(basePackageClasses = GlobalExceptionHandler.class)
 public class UserController {
-
-    @Autowired
-    private ModelMapper modelMapper;
 
     @Autowired
     UserService userService;
@@ -33,60 +29,46 @@ public class UserController {
             }
             return new ResponseEntity<>(userService.getUser(), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/user/{id}")
     public ResponseEntity<User> getUserById(@PathVariable("id") long id) {
         try {
-            Optional<User> userData = userService.getUser(id);
-        if (userData.isPresent()) {
-            return new ResponseEntity<>(userData.get(), HttpStatus.OK);
-        }else{
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+            User userData = userService.getUser(id);
+            if (ObjectUtils.isEmpty(userData)) {
+                return new ResponseEntity<>(userData, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
 
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PostMapping("/user")
     public ResponseEntity<User> createUser(@Valid @RequestBody UserDto userDto) {
         try {
-            User user = modelMapper.map(userDto, User.class);
-            user.setFName(userDto.getFName());
-            user.setLName(userDto.getLName());
-            user.setPhoneNo(userDto.getPhoneNo());
-            user.setEmail(userDto.getEmail());
-            user.setPassword(userDto.getPassword());
-            User userPost = userService.createUser(user);
+            User userPost = userService.createUser(userDto);
             return new ResponseEntity<>(userPost, HttpStatus.CREATED);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PutMapping("/user/{id}")
     public ResponseEntity<User> updateUser(@Valid @PathVariable("id") long id, @RequestBody UserDto userDto) {
         try {
-            Optional<User> userData = userService.getUser(id);
-
-        if (userData.isPresent()) {
-            User user = modelMapper.map(userDto, User.class);
-            user.setFName(userDto.getFName());
-            user.setLName(userDto.getLName());
-            user.setPhoneNo(userDto.getPhoneNo());
-            user.setEmail(userDto.getEmail());
-            user.setPassword(userDto.getPassword());
-            Optional<User> userPut = userService.updateUser(id, user);
-            return new ResponseEntity<>(userPut.get(), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+            User userData = userService.updateUser(id, userDto);
+            if (ObjectUtils.isEmpty(userData)) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            } else {
+                return new ResponseEntity<>(userData, HttpStatus.OK);
+            }
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -102,7 +84,6 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 
 
 }

@@ -18,10 +18,10 @@ public class UserDto {
     private Set<Invoice> invoices;
 
     @NotEmpty(message = "First name is required")
-    private String fName;
+    private String firstName;
 
     @NotEmpty(message = "Last name is required")
-    private String lName;
+    private String lastName;
 
     @NotEmpty(message = "Email is required")
     @Email(message = "Invalid email format")

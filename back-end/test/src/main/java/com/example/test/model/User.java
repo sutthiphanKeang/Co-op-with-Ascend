@@ -1,14 +1,7 @@
 package com.example.test.model;
 
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.springframework.lang.NonNull;
 
 import java.util.Set;
 
@@ -29,12 +22,10 @@ public class User {
     private Set<Invoice> invoices;
 
     @Column(name = "f_name")
-    @JsonProperty("f_name")
-    private String fName;
+    private String firstName;
 
     @Column(name = "l_name")
-    @JsonProperty("l_name")
-    private String lName;
+    private String lastName;
 
     @Column(name = "email")
     private String email;

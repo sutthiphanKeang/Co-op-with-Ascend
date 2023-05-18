@@ -7,6 +7,7 @@ import com.example.test.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,15 +21,15 @@ public class InvoiceService {
     private UserRepository userRepository;
 
     public List<Invoice> getInvoice(){
-        return (List<Invoice>) invoiceRepository.findAll();
+        return invoiceRepository.findAll();
     }
 
     public Optional<Invoice> getInvoice(Long id) {
         return invoiceRepository.findById(id);
     }
 
-    public Invoice createInvoice(Long user_id) {
-        Optional<User> user = userRepository.findById(user_id);
+    public Invoice createInvoice(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
         Invoice invoice = new Invoice();
         if(user.isEmpty()){
             return null;
@@ -37,12 +38,12 @@ public class InvoiceService {
         return invoiceRepository.save(invoice);
     }
 
-    public Optional<Invoice> updateInvoice(Long id, Invoice invoice) {
-        Optional<Invoice> invoiceData = invoiceRepository.findById(id);
-        if(invoiceData.isEmpty()) {
+    public Invoice updateInvoice(Long id, Invoice invoice) {
+        Invoice invoiceData = invoiceRepository.findById(id).orElse(null);
+        if(ObjectUtils.isEmpty(invoiceData)){
             return null;
         }
-        return Optional.of(invoiceRepository.save(invoice));
+        return invoiceRepository.save(invoice);
     }
 
     public boolean deleteInvoice(Long id) {

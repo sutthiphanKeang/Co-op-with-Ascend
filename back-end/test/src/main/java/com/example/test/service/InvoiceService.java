@@ -1,5 +1,6 @@
 package com.example.test.service;
 
+import com.example.test.mapper.InvoiceDto;
 import com.example.test.model.Invoice;
 import com.example.test.model.User;
 import com.example.test.repository.InvoiceRepository;
@@ -20,7 +21,7 @@ public class InvoiceService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<Invoice> getInvoice(){
+    public List<Invoice> getInvoice() {
         return invoiceRepository.findAll();
     }
 
@@ -31,19 +32,20 @@ public class InvoiceService {
     public Invoice createInvoice(Long userId) {
         Optional<User> user = userRepository.findById(userId);
         Invoice invoice = new Invoice();
-        if(user.isEmpty()){
-            return null;
+        if (user.isEmpty()) {
+            return invoice;
         }
         invoice.setUser(user.get());
         return invoiceRepository.save(invoice);
     }
 
-    public Invoice updateInvoice(Long id, Invoice invoice) {
+    public Invoice updateInvoice(Long id, InvoiceDto invoiceDto) {
         Invoice invoiceData = invoiceRepository.findById(id).orElse(null);
-        if(ObjectUtils.isEmpty(invoiceData)){
-            return null;
+        if (ObjectUtils.isEmpty(invoiceData)) {
+            return invoiceData;
         }
-        return invoiceRepository.save(invoice);
+        invoiceData.setStatus(invoiceDto.getStatus());
+        return invoiceRepository.save(invoiceData);
     }
 
     public boolean deleteInvoice(Long id) {

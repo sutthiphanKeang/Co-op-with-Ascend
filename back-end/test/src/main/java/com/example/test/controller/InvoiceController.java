@@ -5,9 +5,12 @@ import com.example.test.mapper.InvoiceDto;
 import com.example.test.model.Invoice;
 import com.example.test.service.InvoiceService;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,10 +21,12 @@ import java.util.Optional;
 @ControllerAdvice(basePackageClasses = GlobalExceptionHandler.class)
 public class InvoiceController {
 
+    private static final Logger logger = LoggerFactory.getLogger(InvoiceController.class);
+
     @Autowired
     InvoiceService invoiceService;
 
-    @GetMapping("/invoice")
+    @GetMapping("/get-invoice")
     public ResponseEntity<List<Invoice>> getAllInvoice() {
         try {
             if (invoiceService.getInvoice().isEmpty()) {
@@ -29,11 +34,12 @@ public class InvoiceController {
             }
             return new ResponseEntity<>(invoiceService.getInvoice(), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            logger.error("An error occurred while getting all of the invoice: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @GetMapping("/invoice/{id}")
+    @GetMapping("/get-invoice/{id}")
     public ResponseEntity<Invoice> getInvoiceById(@PathVariable("id") long id) {
         try {
             Optional<Invoice> invoiceData = invoiceService.getInvoice(id);
@@ -44,11 +50,12 @@ public class InvoiceController {
             }
 
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            logger.error("An error occurred while getting the invoice: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @PostMapping("/invoice/{useId}")
+    @PostMapping("/post-invoice/{useId}")
     public ResponseEntity<Invoice> createInvoice(@Valid @PathVariable("useId") Long userId) {
         try {
             Invoice invoicePost = invoiceService.createInvoice(userId);
@@ -58,28 +65,27 @@ public class InvoiceController {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            logger.error("An error occurred while create the invoice: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @PutMapping("/invoice/{id}")
+    @PutMapping("/put-invoice/{id}")
     public ResponseEntity<Invoice> updateInvoice(@Valid @PathVariable("id") long id, @RequestBody InvoiceDto invoiceDto) {
         try {
-            Optional<Invoice> invoiceData = invoiceService.getInvoice(id);
-
-            if (invoiceData.isPresent()) {
-                invoiceData.get().setStatus(invoiceDto.getStatus());
-                Invoice invoicePut = invoiceService.updateInvoice(id, invoiceData.get());
+            Invoice invoicePut = invoiceService.updateInvoice(id, invoiceDto);
+            if (ObjectUtils.isEmpty(invoicePut)) {
                 return new ResponseEntity<>(invoicePut, HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
         } catch (Exception e) {
+            logger.error("An error occurred while update the invoice: {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @DeleteMapping("/invoice/{id}")
+    @DeleteMapping("/delete-invoice/{id}")
     public ResponseEntity<HttpStatus> deleteInvoice(@PathVariable("id") long id) {
         try {
             if (invoiceService.deleteInvoice(id)) {
@@ -88,6 +94,7 @@ public class InvoiceController {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
         } catch (Exception e) {
+            logger.error("An error occurred while delete the invoice: {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

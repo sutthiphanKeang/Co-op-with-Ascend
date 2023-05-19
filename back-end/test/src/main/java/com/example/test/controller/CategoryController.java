@@ -1,23 +1,17 @@
 package com.example.test.controller;
+
 import com.example.test.exceptions.GlobalExceptionHandler;
 import com.example.test.mapper.CategoryDto;
-import com.example.test.mapper.InvoiceDto;
 import com.example.test.model.Category;
-import com.example.test.model.Invoice;
-import com.example.test.model.Product;
-import com.example.test.model.User;
-import com.example.test.repository.CategoryRepository;
-import com.example.test.repository.InvoiceRepository;
-import com.example.test.repository.ProductRepository;
 import com.example.test.service.CategoryService;
 import jakarta.validation.Valid;
-import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,13 +21,12 @@ import java.util.UUID;
 @ControllerAdvice(basePackageClasses = GlobalExceptionHandler.class)
 public class CategoryController {
 
-    @Autowired
-    private ModelMapper modelMapper;
+    private static final Logger logger = LoggerFactory.getLogger(CategoryController.class);
 
     @Autowired
-    private CategoryService categoryService;
+    CategoryService categoryService;
 
-    @GetMapping("/category")
+    @GetMapping("/get-category")
     public ResponseEntity<List<Category>> getAllCategory() {
         try {
             if (categoryService.getCategory().isEmpty()) {
@@ -41,43 +34,43 @@ public class CategoryController {
             }
             return new ResponseEntity<>(categoryService.getCategory(), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            logger.error("An error occurred while getting all of the category: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @GetMapping("/category/{id}")
+    @GetMapping("/get-category/{id}")
     public ResponseEntity<Category> getCategoryById(@PathVariable("id") UUID id) {
         try {
             Optional<Category> categoryData = categoryService.getCategory(id);
             if (categoryData.isPresent()) {
                 return new ResponseEntity<>(categoryData.get(), HttpStatus.OK);
-            } else{
+            } else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
 
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            logger.error("An error occurred while getting the category: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @PostMapping("/category/{invoiceId}/{productId}")
+    @PostMapping("/post-category/{invoiceId}/{productId}")
     public ResponseEntity<Category> createCategory(@Valid @PathVariable("invoiceId") long invoiceId, @PathVariable("productId") long productId, @RequestBody CategoryDto categoryDto) {
         try {
-            Category category = modelMapper.map(categoryDto, Category.class);
-            category.setUnit(categoryDto.getUnit());
-            Category categoryPost = categoryService.createCategory(invoiceId, productId, category);
-            if(categoryPost != null){
+            Category categoryPost = categoryService.createCategory(invoiceId, productId, categoryDto);
+            if (categoryPost != null) {
                 return new ResponseEntity<>(categoryPost, HttpStatus.CREATED);
-            }
-            else {
+            } else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            logger.error("An error occurred while create the category: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @DeleteMapping("/category/{id}")
+    @DeleteMapping("/delete-category/{id}")
     public ResponseEntity<HttpStatus> deleteCategory(@PathVariable("id") UUID id) {
         try {
             if (categoryService.deleteCategory(id)) {
@@ -86,6 +79,7 @@ public class CategoryController {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
         } catch (Exception e) {
+            logger.error("An error occurred while delete the category: {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

@@ -1,6 +1,6 @@
 package com.example.test.controller;
 
-import com.example.test.exceptions.GlobalExceptionHandler;
+import com.example.test.exception.GlobalExceptionHandler;
 import com.example.test.mapper.ProductDto;
 import com.example.test.model.Product;
 import com.example.test.service.ProductService;
@@ -28,10 +28,11 @@ public class ProductController {
     @GetMapping("/get-product")
     public ResponseEntity<List<Product>> getAllProduct() {
         try {
-            if (productService.getProduct().isEmpty()) {
+            List<Product> productData = productService.getProduct();
+            if (productData.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-            return new ResponseEntity<>(productService.getProduct(), HttpStatus.OK);
+            return new ResponseEntity<>(productData, HttpStatus.OK);
         } catch (Exception e) {
             logger.error("An error occurred while getting all of the product: {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

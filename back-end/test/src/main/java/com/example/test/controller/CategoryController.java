@@ -1,6 +1,6 @@
 package com.example.test.controller;
 
-import com.example.test.exceptions.GlobalExceptionHandler;
+import com.example.test.exception.GlobalExceptionHandler;
 import com.example.test.mapper.CategoryDto;
 import com.example.test.model.Category;
 import com.example.test.service.CategoryService;
@@ -29,10 +29,11 @@ public class CategoryController {
     @GetMapping("/get-category")
     public ResponseEntity<List<Category>> getAllCategory() {
         try {
-            if (categoryService.getCategory().isEmpty()) {
+            List<Category> categoriesData = categoryService.getCategory();
+            if (categoriesData.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-            return new ResponseEntity<>(categoryService.getCategory(), HttpStatus.OK);
+            return new ResponseEntity<>(categoriesData, HttpStatus.OK);
         } catch (Exception e) {
             logger.error("An error occurred while getting all of the category: {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

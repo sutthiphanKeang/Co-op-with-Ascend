@@ -1,6 +1,6 @@
 package com.example.test.controller;
 
-import com.example.test.exceptions.GlobalExceptionHandler;
+import com.example.test.exception.GlobalExceptionHandler;
 import com.example.test.mapper.InvoiceDto;
 import com.example.test.model.Invoice;
 import com.example.test.service.InvoiceService;
@@ -29,10 +29,11 @@ public class InvoiceController {
     @GetMapping("/get-invoice")
     public ResponseEntity<List<Invoice>> getAllInvoice() {
         try {
-            if (invoiceService.getInvoice().isEmpty()) {
+            List<Invoice> invoiceData = invoiceService.getInvoice();
+            if (invoiceData.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-            return new ResponseEntity<>(invoiceService.getInvoice(), HttpStatus.OK);
+            return new ResponseEntity<>(invoiceData, HttpStatus.OK);
         } catch (Exception e) {
             logger.error("An error occurred while getting all of the invoice: {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -75,9 +76,9 @@ public class InvoiceController {
         try {
             Invoice invoicePut = invoiceService.updateInvoice(id, invoiceDto);
             if (ObjectUtils.isEmpty(invoicePut)) {
-                return new ResponseEntity<>(invoicePut, HttpStatus.OK);
-            } else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            } else {
+                return new ResponseEntity<>(invoicePut, HttpStatus.OK);
             }
         } catch (Exception e) {
             logger.error("An error occurred while update the invoice: {}", e.getMessage());

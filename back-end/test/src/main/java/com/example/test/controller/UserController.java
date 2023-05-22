@@ -1,6 +1,6 @@
 package com.example.test.controller;
 
-import com.example.test.exceptions.GlobalExceptionHandler;
+import com.example.test.exception.GlobalExceptionHandler;
 import com.example.test.mapper.UserDto;
 import com.example.test.model.User;
 import com.example.test.service.UserService;
@@ -28,10 +28,13 @@ public class UserController {
     @GetMapping("/get-user")
     public ResponseEntity<List<User>> getAllUser() {
         try {
-            if (ObjectUtils.isEmpty(userService.getUser())) {
+            List<User> userData = userService.getUser();
+            if (ObjectUtils.isEmpty(userData)) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-            return new ResponseEntity<>(userService.getUser(), HttpStatus.OK);
+            else {
+                return new ResponseEntity<>(userData, HttpStatus.OK);
+            }
         } catch (Exception e) {
             logger.error("An error occurred while getting all of the user: {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

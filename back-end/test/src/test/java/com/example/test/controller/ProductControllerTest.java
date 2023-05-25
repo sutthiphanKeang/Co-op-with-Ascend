@@ -3,6 +3,8 @@ package com.example.test.controller;
 import com.example.test.mapper.ProductDto;
 import com.example.test.model.Product;
 import com.example.test.service.ProductService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,154 +15,148 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
-
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 @ExtendWith(MockitoExtension.class)
 class ProductControllerTest {
 
     @Mock
     private ProductService productService;
 
-    @Spy
     @InjectMocks
     private ProductController productController;
+
+    private MockMvc mockMvc;
 
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(productController).build();
+    }
+
+    private static String asJsonString(Object obj) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.writeValueAsString(obj);
     }
 
     @Test
-    void testGetAllProduct() {
+    void testGetAllProduct() throws Exception {
         List<Product> products = new ArrayList<>();
-        products.add(new Product());
+        Product product = new Product();
+        product.setId(1L);
+        product.setName("test");
+        product.setPrice(1234);
+        products.add(product);
 
         when(productService.getProduct()).thenReturn(products);
 
-        ResponseEntity<List<Product>> response = productController.getAllProduct();
+        mockMvc.perform(get("/api/get-product"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(product.getId()))
+                .andExpect(jsonPath("$[0].name").value(product.getName()))
+                .andExpect(jsonPath("$[0].price").value(product.getPrice()));
 
-        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        Assertions.assertEquals(products, response.getBody());
-
-        verify(productService, times(1)).getProduct();
+        products.clear();
+        mockMvc.perform(get("/api/get-product"))
+                .andExpect(status().isNoContent());
     }
 
     @Test
-    void testGetAllProduct_NoContent() {
-        when(productService.getProduct()).thenReturn(new ArrayList<>());
-
-        ResponseEntity<List<Product>> response = productController.getAllProduct();
-
-        Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        Assertions.assertNull(response.getBody());
-
-        verify(productService, times(1)).getProduct();
-    }
-
-    @Test
-    void testGetProductById() {
+    void testGetProductById() throws Exception {
         long productId = 1L;
         Product product = new Product();
+        product.setId(productId);
+        product.setName("test");
+        product.setPrice(1234);
 
         when(productService.getProduct(productId)).thenReturn(Optional.of(product));
 
-        ResponseEntity<Product> response = productController.getProductById(productId);
-
-        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        Assertions.assertEquals(product, response.getBody());
-
-        verify(productService, times(1)).getProduct(productId);
-    }
-
-    @Test
-    void testGetProductById_NotFound() {
-        long productId = 1L;
+        mockMvc.perform(get("/api/get-product/{id}", productId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(product.getId()))
+                .andExpect(jsonPath("$.name").value(product.getName()))
+                .andExpect(jsonPath("$.price").value(product.getPrice()));
 
         when(productService.getProduct(productId)).thenReturn(Optional.empty());
 
-        ResponseEntity<Product> response = productController.getProductById(productId);
-
-        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        Assertions.assertNull(response.getBody());
-
-        verify(productService, times(1)).getProduct(productId);
+        mockMvc.perform(get("/api/get-product/{id}", productId))
+                .andExpect(status().isNotFound());
     }
 
     @Test
-    void testCreateProduct() {
+    void testCreateProduct() throws Exception{
         ProductDto productDto = new ProductDto();
+        productDto.setName("test");
+        productDto.setPrice(1234);
+
         Product product = new Product();
+        product.setId(1L);
+        product.setName(productDto.getName());
+        product.setPrice(productDto.getPrice());
 
-        when(productService.createProduct(productDto)).thenReturn(product);
+        when(productService.createProduct(any(ProductDto.class))).thenReturn(product);
 
-        ResponseEntity<Product> response = productController.createProduct(productDto);
-
-        Assertions.assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        Assertions.assertEquals(product, response.getBody());
-
-        verify(productService, times(1)).createProduct(productDto);
+        mockMvc.perform(post("/api/post-product")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(productDto)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(product.getId()))
+                .andExpect(jsonPath("$.name").value(product.getName()))
+                .andExpect(jsonPath("$.price").value(product.getPrice()));
     }
 
     @Test
-    void testUpdateProduct() {
+    void testUpdateProduct() throws Exception {
         long productId = 1L;
         ProductDto productDto = new ProductDto();
+        productDto.setName("test");
+        productDto.setPrice(5678);
+
         Product product = new Product();
+        product.setId(productId);
+        product.setName(productDto.getName());
+        product.setPrice(productDto.getPrice());
 
-        when(productService.updateProduct(productId, productDto)).thenReturn(Optional.of(product));
+        when(productService.updateProduct(eq(productId), any(ProductDto.class))).thenReturn(Optional.of(product));
 
-        ResponseEntity<Product> response = productController.updateProduct(productId, productDto);
+        mockMvc.perform(put("/api/put-product/{id}", productId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(productDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(product.getId()))
+                .andExpect(jsonPath("$.name").value(product.getName()))
+                .andExpect(jsonPath("$.price").value(product.getPrice()));
 
-        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        Assertions.assertEquals(product, response.getBody());
+        when(productService.updateProduct(eq(productId), any(ProductDto.class))).thenReturn(Optional.empty());
 
-        verify(productService, times(1)).updateProduct(productId, productDto);
+        mockMvc.perform(put("/api/put-product/{id}", productId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(productDto)))
+                .andExpect(status().isNotFound());
     }
 
     @Test
-    void testUpdateProduct_NotFound() {
-        long productId = 1L;
-        ProductDto productDto = new ProductDto();
-
-        when(productService.updateProduct(productId, productDto)).thenReturn(Optional.empty());
-
-        ResponseEntity<Product> response = productController.updateProduct(productId, productDto);
-
-        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        Assertions.assertNull(response.getBody());
-
-        verify(productService, times(1)).updateProduct(productId, productDto);
-    }
-
-    @Test
-    void testDeleteProduct() {
+    void testDeleteProduct() throws Exception {
         long productId = 1L;
 
         when(productService.deleteProduct(productId)).thenReturn(true);
 
-        ResponseEntity<HttpStatus> response = productController.deleteProduct(productId);
-
-        Assertions.assertEquals(HttpStatus.GONE, response.getStatusCode());
-
-        verify(productService, times(1)).deleteProduct(productId);
-    }
-
-    @Test
-    void testDeleteProduct_NotFound() {
-        long productId = 1L;
+        mockMvc.perform(delete("/api/delete-product/{id}", productId))
+                .andExpect(status().isGone());
 
         when(productService.deleteProduct(productId)).thenReturn(false);
 
-        ResponseEntity<HttpStatus> response = productController.deleteProduct(productId);
-
-        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-
-        verify(productService, times(1)).deleteProduct(productId);
+        mockMvc.perform(delete("/api/delete-product/{id}", productId))
+                .andExpect(status().isNotFound());
     }
 }

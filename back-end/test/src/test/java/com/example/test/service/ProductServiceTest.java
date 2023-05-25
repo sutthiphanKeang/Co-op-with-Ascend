@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.dao.EmptyResultDataAccessException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +31,6 @@ class ProductServiceTest {
     @Mock
     private ModelMapper modelMapper;
 
-    @Spy
     @InjectMocks
     private ProductService productService;
 
@@ -41,57 +41,79 @@ class ProductServiceTest {
 
     @Test
     void testGetProduct() {
-        Product product1 = new Product();
-        Product product2 = new Product();
-        List<Product> products = Arrays.asList(product1, product2);
-        when(productRepository.findAll()).thenReturn(products);
+        List<Product> expectedProducts = new ArrayList<>();
+        Product product = new Product();
+        product.setId(1L);
+        product.setName("test");
+        product.setPrice(1234);
+        expectedProducts.add(product);
 
-        List<Product> result = productService.getProduct();
+        when(productRepository.findAll()).thenReturn(expectedProducts);
 
-        Assertions.assertEquals(products, result);
+        List<Product> actualProducts = productService.getProduct();
+
+        Assertions.assertEquals(expectedProducts, actualProducts);
         verify(productRepository, times(1)).findAll();
     }
 
     @Test
     void testGetProductById() {
         long productId = 1L;
-        Product product = new Product();
-        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+        Product expectedProducts = new Product();
+        expectedProducts.setId(1L);
+        expectedProducts.setName("test");
+        expectedProducts.setPrice(1234);
 
-        Optional<Product> result = productService.getProduct(productId);
+        when(productRepository.findById(productId)).thenReturn(Optional.of(expectedProducts));
 
-        Assertions.assertEquals(Optional.of(product), result);
+        Optional<Product> actualProducts = productService.getProduct(productId);
+
+        Assertions.assertEquals(Optional.of(expectedProducts), actualProducts);
         verify(productRepository, times(1)).findById(productId);
     }
 
     @Test
     void testCreateProduct() {
         ProductDto productDto = new ProductDto();
-        Product product = new Product();
-        when(modelMapper.map(productDto, Product.class)).thenReturn(product);
-        when(productRepository.save(product)).thenReturn(product);
+        productDto.setName("test");
+        productDto.setPrice(1234);
 
-        Product result = productService.createProduct(productDto);
+        Product expectedProduct = new Product();
+        expectedProduct.setId(1L);
+        expectedProduct.setName(productDto.getName());
+        expectedProduct.setPrice(productDto.getPrice());
 
-        Assertions.assertEquals(product, result);
+        when(modelMapper.map(productDto, Product.class)).thenReturn(expectedProduct);
+        when(productRepository.save(any(Product.class))).thenReturn(expectedProduct);
+
+        Product actualProduct = productService.createProduct(productDto);
+
+        Assertions.assertEquals(expectedProduct, actualProduct);
         verify(modelMapper, times(1)).map(productDto, Product.class);
-        verify(productRepository, times(1)).save(product);
+        verify(productRepository, times(1)).save(expectedProduct);
     }
 
     @Test
     void testUpdateProduct() {
         long productId = 1L;
         ProductDto productDto = new ProductDto();
-        Product product = new Product();
-        Optional<Product> productData = Optional.of(product);
-        when(productRepository.findById(productId)).thenReturn(productData);
-        when(productRepository.save(product)).thenReturn(product);
+        productDto.setName("test");
+        productDto.setPrice(1234);
 
-        Optional<Product> result = productService.updateProduct(productId, productDto);
+        Product expectedProduct = new Product();
+        expectedProduct.setId(1L);
+        expectedProduct.setName(productDto.getName());
+        expectedProduct.setPrice(productDto.getPrice());
 
-        Assertions.assertEquals(productData, result);
+
+        when(productRepository.findById(productId)).thenReturn(Optional.of(expectedProduct));
+        when(productRepository.save(any(Product.class))).thenReturn(expectedProduct);
+
+        Optional<Product> actualProduct = productService.updateProduct(productId, productDto);
+
+        Assertions.assertEquals(Optional.of(expectedProduct), actualProduct);
         verify(productRepository, times(1)).findById(productId);
-        verify(productRepository, times(1)).save(product);
+        verify(productRepository, times(1)).save(expectedProduct);
     }
 
     @Test
@@ -99,10 +121,15 @@ class ProductServiceTest {
         long productId = 1L;
         doNothing().when(productRepository).deleteById(productId);
 
-        boolean result = productService.deleteProduct(productId);
+        boolean resultTrue = productService.deleteProduct(productId);
 
-        Assertions.assertTrue(result);
-        verify(productRepository, times(1)).deleteById(productId);
+        doThrow(EmptyResultDataAccessException.class).when(productRepository).deleteById(productId);
+
+        boolean resultFalse = productService.deleteProduct(productId);
+
+        Assertions.assertTrue(resultTrue);
+        Assertions.assertFalse(resultFalse);
+        verify(productRepository, times(2)).deleteById(productId);
     }
 
     @Test

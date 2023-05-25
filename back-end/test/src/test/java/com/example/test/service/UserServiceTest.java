@@ -31,7 +31,6 @@ class UserServiceTest {
     @Mock
     private ModelMapper modelMapper;
 
-    @Spy
     @InjectMocks
     private UserService userService;
 

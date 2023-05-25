@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.dao.EmptyResultDataAccessException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -41,9 +42,13 @@ class UserServiceTest {
 
     @Test
     void testGetUser() {
-        User user1 = new User();
-        User user2 = new User();
-        List<User> expectedUsers = Arrays.asList(user1, user2);
+        List<User> expectedUsers = new ArrayList<>();
+        User user = new User();
+        user.setId(1L);
+        user.setFirstName("keang");
+        user.setLastName("55555");
+        user.setEmail("test@test.com");
+        expectedUsers.add(user);
 
         when(userRepository.findAll()).thenReturn(expectedUsers);
 
@@ -57,6 +62,10 @@ class UserServiceTest {
     void testGetUserById() {
         Long userId = 1L;
         User expectedUser = new User();
+        expectedUser.setId(userId);
+        expectedUser.setFirstName("keang");
+        expectedUser.setLastName("55555");
+        expectedUser.setEmail("test@test.com");
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(expectedUser));
 
@@ -69,10 +78,22 @@ class UserServiceTest {
     @Test
     void testCreateUser() {
         UserDto userDto = new UserDto();
+        userDto.setFirstName("keang");
+        userDto.setLastName("55555");
+        userDto.setEmail("test@test.com");
+        userDto.setPhoneNo("1234567890");
+        userDto.setPassword("12345678");
+
         User expectedUser = new User();
+        expectedUser.setId(1L);
+        expectedUser.setFirstName(userDto.getFirstName());
+        expectedUser.setLastName(userDto.getLastName());
+        expectedUser.setEmail(userDto.getEmail());
+        expectedUser.setPhoneNo(userDto.getPhoneNo());
+        expectedUser.setPassword(userDto.getPassword());
 
         when(modelMapper.map(userDto, User.class)).thenReturn(expectedUser);
-        when(userRepository.save(expectedUser)).thenReturn(expectedUser);
+        when(userRepository.save(any(User.class))).thenReturn(expectedUser);
 
         User actualUser = userService.createUser(userDto);
 
@@ -85,12 +106,31 @@ class UserServiceTest {
     void testUpdateUser() {
         Long userId = 1L;
         UserDto userDto = new UserDto();
+        userDto.setFirstName("keang");
+        userDto.setLastName("55555");
+        userDto.setEmail("test@test.com");
+        userDto.setPhoneNo("1234567890");
+        userDto.setPassword("12345678");
+
         User existingUser = new User();
+        existingUser.setId(userId);
+        existingUser.setFirstName(userDto.getFirstName());
+        existingUser.setLastName(userDto.getLastName());
+        existingUser.setEmail(userDto.getEmail());
+        existingUser.setPhoneNo(userDto.getPhoneNo());
+        existingUser.setPassword(userDto.getPassword());
+
         User expectedUser = new User();
+        expectedUser.setId(userId);
+        expectedUser.setFirstName(userDto.getFirstName());
+        expectedUser.setLastName(userDto.getLastName());
+        expectedUser.setEmail(userDto.getEmail());
+        expectedUser.setPhoneNo(userDto.getPhoneNo());
+        expectedUser.setPassword(userDto.getPassword());
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
         when(modelMapper.map(userDto, User.class)).thenReturn(expectedUser);
-        when(userRepository.save(expectedUser)).thenReturn(expectedUser);
+        when(userRepository.save(any(User.class))).thenReturn(expectedUser);
 
         User actualUser = userService.updateUser(userId, userDto);
 
@@ -106,21 +146,15 @@ class UserServiceTest {
 
         doNothing().when(userRepository).deleteById(userId);
 
-        boolean result = userService.deleteUser(userId);
-
-        Assertions.assertTrue(result);
-        verify(userRepository, times(1)).deleteById(userId);
-    }
-
-    @Test
-    void testDeleteUser_NotFound() {
-        Long userId = 1L;
+        boolean resultTrue = userService.deleteUser(userId);
 
         doThrow(new EmptyResultDataAccessException(1)).when(userRepository).deleteById(userId);
 
-        boolean result = userService.deleteUser(userId);
+        boolean resultFalse = userService.deleteUser(userId);
 
-        Assertions.assertFalse(result);
-        verify(userRepository, times(1)).deleteById(userId);
+        Assertions.assertTrue(resultTrue);
+        Assertions.assertFalse(resultFalse);
+        verify(userRepository, times(2)).deleteById(userId);
     }
+
 }

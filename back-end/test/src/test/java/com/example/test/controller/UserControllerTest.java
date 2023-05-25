@@ -3,159 +3,181 @@ package com.example.test.controller;
 import com.example.test.mapper.UserDto;
 import com.example.test.model.User;
 import com.example.test.service.UserService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {
 
     @Mock
     private UserService userService;
-    @Spy
+
     @InjectMocks
     private UserController userController;
+
+    private MockMvc mockMvc;
 
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
+    }
+
+    private static String asJsonString(Object obj) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.writeValueAsString(obj);
     }
 
     @Test
-    void testGetAllUser() {
+    void testGetAllUser() throws Exception {
         List<User> users = new ArrayList<>();
-        users.add(new User());
+        User user = new User();
+        user.setId(1L);
+        user.setFirstName("keang");
+        user.setLastName("55555");
+        user.setEmail("test@test.com");
+        users.add(user);
 
         when(userService.getUser()).thenReturn(users);
 
-        ResponseEntity<List<User>> response = userController.getAllUser();
+        mockMvc.perform(get("/api/get-user"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(user.getId()))
+                .andExpect(jsonPath("$[0].firstName").value(user.getFirstName()))
+                .andExpect(jsonPath("$[0].lastName").value(user.getLastName()))
+                .andExpect(jsonPath("$[0].email").value(user.getEmail()));
 
-        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        Assertions.assertEquals(users, response.getBody());
-
-        verify(userService, times(1)).getUser();
+        users.clear();
+        mockMvc.perform(get("/api/get-user"))
+                .andExpect(status().isNoContent());
     }
 
     @Test
-    void testGetAllUser_NoContent() {
-        when(userService.getUser()).thenReturn(new ArrayList<>());
-
-        ResponseEntity<List<User>> response = userController.getAllUser();
-
-        Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        Assertions.assertNull(response.getBody());
-
-        verify(userService, times(1)).getUser();
-    }
-
-    @Test
-    void testGetUserById() {
+    void testGetUserById() throws Exception {
         long userId = 1L;
         User user = new User();
+        user.setId(userId);
+        user.setFirstName("keang");
+        user.setLastName("55555");
+        user.setEmail("test@test.com");
 
         when(userService.getUser(userId)).thenReturn(user);
 
-        ResponseEntity<User> response = userController.getUserById(userId);
-
-        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        Assertions.assertEquals(user, response.getBody());
-
-        verify(userService, times(1)).getUser(userId);
-    }
-
-    @Test
-    void testGetUserById_NotFound() {
-        long userId = 1L;
+        mockMvc.perform(get("/api/get-user/{id}", userId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(user.getId()))
+                .andExpect(jsonPath("$.firstName").value(user.getFirstName()))
+                .andExpect(jsonPath("$.lastName").value(user.getLastName()))
+                .andExpect(jsonPath("$.email").value(user.getEmail()));
 
         when(userService.getUser(userId)).thenReturn(null);
 
-        ResponseEntity<User> response = userController.getUserById(userId);
-
-        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        Assertions.assertNull(response.getBody());
-
-        verify(userService, times(1)).getUser(userId);
+        mockMvc.perform(get("/api/get-user/{id}", userId))
+                .andExpect(status().isNotFound());
     }
 
     @Test
-    void testCreateUser() {
+    void testCreateUser() throws Exception {
         UserDto userDto = new UserDto();
+        userDto.setFirstName("keang");
+        userDto.setLastName("55555");
+        userDto.setEmail("test@test.com");
+        userDto.setPhoneNo("1234567890");
+        userDto.setPassword("12345678");
+
         User user = new User();
+        user.setId(1L);
+        user.setFirstName(userDto.getFirstName());
+        user.setLastName(userDto.getLastName());
+        user.setEmail(userDto.getEmail());
+        user.setPhoneNo(userDto.getPhoneNo());
+        user.setPassword(userDto.getPassword());
 
-        when(userService.createUser(userDto)).thenReturn(user);
+        when(userService.createUser(any(UserDto.class))).thenReturn(user);
 
-        ResponseEntity<User> response = userController.createUser(userDto);
-
-        Assertions.assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        Assertions.assertEquals(user, response.getBody());
-
-        verify(userService, times(1)).createUser(userDto);
+        mockMvc.perform(post("/api/post-user")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(userDto)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(user.getId()))
+                .andExpect(jsonPath("$.firstName").value(user.getFirstName()))
+                .andExpect(jsonPath("$.lastName").value(user.getLastName()))
+                .andExpect(jsonPath("$.email").value(userDto.getEmail()))
+                .andExpect(jsonPath("$.phoneNo").value(userDto.getPhoneNo()))
+                .andExpect(jsonPath("$.password").value(userDto.getPassword()));
     }
 
     @Test
-    void testUpdateUser() {
+    void testUpdateUser() throws Exception {
         long userId = 1L;
         UserDto userDto = new UserDto();
+        userDto.setFirstName("keang");
+        userDto.setLastName("66666");
+        userDto.setEmail("test@test.com");
+        userDto.setPhoneNo("1234567890");
+        userDto.setPassword("12345678");
+
         User user = new User();
+        user.setId(userId);
+        user.setFirstName(userDto.getFirstName());
+        user.setLastName(userDto.getLastName());
+        user.setEmail(userDto.getEmail());
+        user.setPhoneNo(userDto.getPhoneNo());
+        user.setPassword(userDto.getPassword());
 
-        when(userService.updateUser(userId, userDto)).thenReturn(user);
+        when(userService.updateUser(eq(userId), any(UserDto.class))).thenReturn(user);
 
-        ResponseEntity<User> response = userController.updateUser(userId, userDto);
+        mockMvc.perform(put("/api/put-user/{id}", userId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(userDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(user.getId()))
+                .andExpect(jsonPath("$.firstName").value(user.getFirstName()))
+                .andExpect(jsonPath("$.lastName").value(user.getLastName()))
+                .andExpect(jsonPath("$.email").value(userDto.getEmail()))
+                .andExpect(jsonPath("$.phoneNo").value(userDto.getPhoneNo()))
+                .andExpect(jsonPath("$.password").value(userDto.getPassword()));
 
-        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        Assertions.assertEquals(user, response.getBody());
+        when(userService.updateUser(eq(userId), any(UserDto.class))).thenReturn(null);
 
-        verify(userService, times(1)).updateUser(userId, userDto);
+        mockMvc.perform(put("/api/put-user/{id}", userId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(userDto)))
+                .andExpect(status().isNotFound());
     }
 
     @Test
-    void testUpdateUser_NotFound() {
-        long userId = 1L;
-        UserDto userDto = new UserDto();
-
-        when(userService.updateUser(userId, userDto)).thenReturn(null);
-
-        ResponseEntity<User> response = userController.updateUser(userId, userDto);
-
-        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        Assertions.assertNull(response.getBody());
-
-        verify(userService, times(1)).updateUser(userId, userDto);
-    }
-
-    @Test
-    void testDeleteUser() {
+    void testDeleteUser() throws Exception {
         long userId = 1L;
 
         when(userService.deleteUser(userId)).thenReturn(true);
 
-        ResponseEntity<HttpStatus> response = userController.deleteUser(userId);
-
-        Assertions.assertEquals(HttpStatus.GONE, response.getStatusCode());
-
-        verify(userService, times(1)).deleteUser(userId);
-    }
-
-    @Test
-    void testDeleteUser_NotFound() {
-        long userId = 1L;
+        mockMvc.perform(delete("/api/delete-user/{id}", userId))
+                .andExpect(status().isGone());
 
         when(userService.deleteUser(userId)).thenReturn(false);
 
-        ResponseEntity<HttpStatus> response = userController.deleteUser(userId);
-
-        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-
-        verify(userService, times(1)).deleteUser(userId);
+        mockMvc.perform(delete("/api/delete-user/{id}", userId))
+                .andExpect(status().isNotFound());
     }
 }

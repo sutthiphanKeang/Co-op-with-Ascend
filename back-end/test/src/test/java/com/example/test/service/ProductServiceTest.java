@@ -131,15 +131,4 @@ class ProductServiceTest {
         Assertions.assertFalse(resultFalse);
         verify(productRepository, times(2)).deleteById(productId);
     }
-
-    @Test
-    void testDeleteProduct_NotFound() {
-        long productId = 1L;
-        doThrow(EmptyResultDataAccessException.class).when(productRepository).deleteById(productId);
-
-        boolean result = productService.deleteProduct(productId);
-
-        Assertions.assertFalse(result);
-        verify(productRepository, times(1)).deleteById(productId);
-    }
 }

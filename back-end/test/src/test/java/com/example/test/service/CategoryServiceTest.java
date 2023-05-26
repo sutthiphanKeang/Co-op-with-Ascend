@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.dao.EmptyResultDataAccessException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -48,47 +49,71 @@ class CategoryServiceTest {
 
     @Test
     void testGetCategory() {
-        Category category1 = new Category();
-        Category category2 = new Category();
-        when(categoryRepository.findAll()).thenReturn(List.of(category1, category2));
+        List<Category> expectedCategories = new ArrayList<>();
+        UUID categoryId = UUID.randomUUID();
+        Product product = new Product();
+        Invoice invoice = new Invoice();
+        Category category = new Category();
+        category.setId(categoryId);
+        category.setInvoice(invoice);
+        category.setProduct(product);
+        category.setUnit(1);
+        expectedCategories.add(category);
 
-        List<Category> result = categoryService.getCategory();
+        when(categoryRepository.findAll()).thenReturn(expectedCategories);
 
-        Assertions.assertEquals(List.of(category1, category2), result);
+        List<Category> actualCategories = categoryService.getCategory();
+
+        Assertions.assertEquals(expectedCategories, actualCategories);
         verify(categoryRepository, times(1)).findAll();
     }
 
     @Test
     void testGetCategoryById() {
         UUID categoryId = UUID.randomUUID();
-        Category category = new Category();
-        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
+        Product product = new Product();
+        Invoice invoice = new Invoice();
+        Category expectedCategory = new Category();
+        expectedCategory.setId(categoryId);
+        expectedCategory.setInvoice(invoice);
+        expectedCategory.setProduct(product);
+        expectedCategory.setUnit(1);
 
-        Optional<Category> result = categoryService.getCategory(categoryId);
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(expectedCategory));
 
-        Assertions.assertEquals(Optional.of(category), result);
+        Optional<Category> actualCategory = categoryService.getCategory(categoryId);
+
+        Assertions.assertEquals(Optional.of(expectedCategory), actualCategory);
         verify(categoryRepository, times(1)).findById(categoryId);
     }
 
     @Test
     void testCreateCategory() {
-        Long invoiceId = 1L;
-        Long productId = 1L;
-        CategoryDto categoryDto = new CategoryDto();
+        long invoiceId = 1L;
+        long productId = 2L;
+        UUID categoryId = UUID.randomUUID();
         Product product = new Product();
         Invoice invoice = new Invoice();
-        Category category = new Category();
+        CategoryDto categoryDto = new CategoryDto();
+        categoryDto.setUnit(2);
+
+        Category expectedCategory = new Category();
+        expectedCategory.setId(categoryId);
+        expectedCategory.setUnit(categoryDto.getUnit());
+        expectedCategory.setInvoice(invoice);
+        expectedCategory.setProduct(product);
+
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
         when(invoiceRepository.findById(invoiceId)).thenReturn(Optional.of(invoice));
-        when(modelMapper.map(categoryDto, Category.class)).thenReturn(category);
-        when(categoryRepository.save(category)).thenReturn(category);
+        when(modelMapper.map(categoryDto, Category.class)).thenReturn(expectedCategory);
+        when(categoryRepository.save(any(Category.class))).thenReturn(expectedCategory);
 
-        Category result = categoryService.createCategory(invoiceId, productId, categoryDto);
+        Category actualCategory = categoryService.createCategory(invoiceId, productId, categoryDto);
 
-        Assertions.assertEquals(category, result);
+        Assertions.assertEquals(expectedCategory, actualCategory);
         verify(productRepository, times(1)).findById(productId);
         verify(invoiceRepository, times(1)).findById(invoiceId);
-        verify(categoryRepository, times(1)).save(category);
+        verify(categoryRepository, times(1)).save(expectedCategory);
     }
 
     @Test
@@ -96,12 +121,15 @@ class CategoryServiceTest {
         Long invoiceId = 1L;
         Long productId = 1L;
         CategoryDto categoryDto = new CategoryDto();
+        Invoice invoice = new Invoice();
         when(productRepository.findById(productId)).thenReturn(Optional.empty());
+        when(invoiceRepository.findById(invoiceId)).thenReturn(Optional.of(invoice));
 
-        Category result = categoryService.createCategory(invoiceId, productId, categoryDto);
+        Category actualCategory = categoryService.createCategory(invoiceId, productId, categoryDto);
 
-        Assertions.assertNull(result);
+        Assertions.assertNull(actualCategory);
         verify(productRepository, times(1)).findById(productId);
+        verify(invoiceRepository, times(1)).findById(invoiceId);
         verifyNoInteractions(categoryRepository);
     }
 
@@ -114,9 +142,9 @@ class CategoryServiceTest {
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
         when(invoiceRepository.findById(invoiceId)).thenReturn(Optional.empty());
 
-        Category result = categoryService.createCategory(invoiceId, productId, categoryDto);
+        Category actualCategory = categoryService.createCategory(invoiceId, productId, categoryDto);
 
-        Assertions.assertNull(result);
+        Assertions.assertNull(actualCategory);
         verify(productRepository, times(1)).findById(productId);
         verify(invoiceRepository, times(1)).findById(invoiceId);
         verifyNoInteractions(categoryRepository);
@@ -127,21 +155,15 @@ class CategoryServiceTest {
         UUID categoryId = UUID.randomUUID();
         doNothing().when(categoryRepository).deleteById(categoryId);
 
-        boolean result = categoryService.deleteCategory(categoryId);
+        boolean resultTrue = categoryService.deleteCategory(categoryId);
 
-        Assertions.assertTrue(result);
-        verify(categoryRepository, times(1)).deleteById(categoryId);
-    }
-
-    @Test
-    void testDeleteCategory_NotFound() {
-        UUID categoryId = UUID.randomUUID();
         doThrow(EmptyResultDataAccessException.class).when(categoryRepository).deleteById(categoryId);
 
-        boolean result = categoryService.deleteCategory(categoryId);
+        boolean resultFalse = categoryService.deleteCategory(categoryId);
 
-        Assertions.assertFalse(result);
-        verify(categoryRepository, times(1)).deleteById(categoryId);
+        Assertions.assertTrue(resultTrue);
+        Assertions.assertFalse(resultFalse);
+        verify(categoryRepository, times(2)).deleteById(categoryId);
     }
 }
 

@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.Mockito.*;
+
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceTest {
 

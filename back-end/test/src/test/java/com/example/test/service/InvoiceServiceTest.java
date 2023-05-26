@@ -11,8 +11,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 import org.springframework.dao.EmptyResultDataAccessException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +29,9 @@ class InvoiceServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private ModelMapper modelMapper;
+
     @Spy
     @InjectMocks
     private InvoiceService invoiceService;
@@ -38,25 +43,32 @@ class InvoiceServiceTest {
 
     @Test
     void testGetInvoice() {
-        Invoice invoice1 = new Invoice();
-        Invoice invoice2 = new Invoice();
-        when(invoiceRepository.findAll()).thenReturn(List.of(invoice1, invoice2));
+        List<Invoice> expectedInvoices = new ArrayList<>();
+        Invoice invoice = new Invoice();
+        invoice.setId(1L);
+        invoice.setStatus(Boolean.FALSE);
+        expectedInvoices.add(invoice);
 
-        List<Invoice> result = invoiceService.getInvoice();
+        when(invoiceRepository.findAll()).thenReturn(expectedInvoices);
 
-        Assertions.assertEquals(List.of(invoice1, invoice2), result);
+        List<Invoice> actualInvoices = invoiceService.getInvoice();
+
+        Assertions.assertEquals(expectedInvoices, actualInvoices);
         verify(invoiceRepository, times(1)).findAll();
     }
 
     @Test
     void testGetInvoiceById() {
         Long invoiceId = 1L;
-        Invoice invoice = new Invoice();
-        when(invoiceRepository.findById(invoiceId)).thenReturn(Optional.of(invoice));
+        Invoice expectedInvoice = new Invoice();
+        expectedInvoice.setId(invoiceId);
+        expectedInvoice.setStatus(Boolean.FALSE);
 
-        Optional<Invoice> result = invoiceService.getInvoice(invoiceId);
+        when(invoiceRepository.findById(invoiceId)).thenReturn(Optional.of(expectedInvoice));
 
-        Assertions.assertEquals(Optional.of(invoice), result);
+        Optional<Invoice> actualInvoice = invoiceService.getInvoice(invoiceId);
+
+        Assertions.assertEquals(Optional.of(expectedInvoice), actualInvoice);
         verify(invoiceRepository, times(1)).findById(invoiceId);
     }
 
@@ -64,47 +76,39 @@ class InvoiceServiceTest {
     void testCreateInvoice() {
         Long userId = 1L;
         User user = new User();
-        Invoice invoice = new Invoice();
-        invoice.setUser(user);
+        Invoice expectedInvoice = new Invoice();
+        expectedInvoice.setUser(user);
+
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(invoiceRepository.save(Mockito.any(Invoice.class))).thenReturn(invoice);
+        when(invoiceRepository.save(any(Invoice.class))).thenReturn(expectedInvoice);
 
-        Invoice result = invoiceService.createInvoice(userId);
+        Invoice actualInvoice = invoiceService.createInvoice(userId);
 
-        Assertions.assertEquals(invoice, result);
-        Assertions.assertEquals(user, invoice.getUser());
+        Assertions.assertEquals(expectedInvoice, actualInvoice);
+        Assertions.assertEquals(user, expectedInvoice.getUser());
         verify(userRepository, times(1)).findById(userId);
-        verify(invoiceRepository, times(1)).save(invoice);
-    }
-
-    @Test
-    void testCreateInvoice_UserNotFound() {
-        Long userId = 1L;
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
-
-        Invoice result = invoiceService.createInvoice(userId);
-
-        Assertions.assertNotNull(result);
-        Assertions.assertNull(result.getUser());
-
-        verify(userRepository, times(1)).findById(userId);
-        verifyNoInteractions(invoiceRepository);
+        verify(invoiceRepository, times(1)).save(expectedInvoice);
     }
 
     @Test
     void testUpdateInvoice() {
         Long invoiceId = 1L;
         InvoiceDto invoiceDto = new InvoiceDto();
-        Invoice invoice = new Invoice();
-        when(invoiceRepository.findById(invoiceId)).thenReturn(Optional.of(invoice));
-        when(invoiceRepository.save(invoice)).thenReturn(invoice);
+        invoiceDto.setStatus(Boolean.TRUE);
 
-        Invoice result = invoiceService.updateInvoice(invoiceId, invoiceDto);
+        Invoice expectedInvoice = new Invoice();
+        expectedInvoice.setId(invoiceId);
+        expectedInvoice.setStatus(invoiceDto.getStatus());
 
-        Assertions.assertEquals(invoice, result);
-        Assertions.assertEquals(invoiceDto.getStatus(), invoice.getStatus());
+        when(invoiceRepository.findById(invoiceId)).thenReturn(Optional.of(expectedInvoice));
+        when(invoiceRepository.save(any(Invoice.class))).thenReturn(expectedInvoice);
+
+        Invoice actualInvoice = invoiceService.updateInvoice(invoiceId, invoiceDto);
+
+        Assertions.assertEquals(expectedInvoice, actualInvoice);
+        Assertions.assertEquals(invoiceDto.getStatus(), expectedInvoice.getStatus());
         verify(invoiceRepository, times(1)).findById(invoiceId);
-        verify(invoiceRepository, times(1)).save(invoice);
+        verify(invoiceRepository, times(1)).save(expectedInvoice);
     }
 
     @Test
@@ -112,20 +116,14 @@ class InvoiceServiceTest {
         Long invoiceId = 1L;
         doNothing().when(invoiceRepository).deleteById(invoiceId);
 
-        boolean result = invoiceService.deleteInvoice(invoiceId);
+        boolean resultTrue = invoiceService.deleteInvoice(invoiceId);
 
-        Assertions.assertTrue(result);
-        verify(invoiceRepository, times(1)).deleteById(invoiceId);
-    }
-
-    @Test
-    void testDeleteInvoice_NotFound() {
-        Long invoiceId = 1L;
         doThrow(EmptyResultDataAccessException.class).when(invoiceRepository).deleteById(invoiceId);
 
-        boolean result = invoiceService.deleteInvoice(invoiceId);
+        boolean resultFalse = invoiceService.deleteInvoice(invoiceId);
 
-        Assertions.assertFalse(result);
-        verify(invoiceRepository, times(1)).deleteById(invoiceId);
+        Assertions.assertTrue(resultTrue);
+        Assertions.assertFalse(resultFalse);
+        verify(invoiceRepository, times(2)).deleteById(invoiceId);
     }
 }

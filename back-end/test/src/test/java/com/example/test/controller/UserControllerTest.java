@@ -68,6 +68,12 @@ class UserControllerTest {
         users.clear();
         mockMvc.perform(get("/api/get-user"))
                 .andExpect(status().isNoContent());
+
+        when(userService.getUser()).thenThrow(new RuntimeException());
+
+        mockMvc.perform(get("/api/get-user"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 
     @Test
@@ -92,6 +98,12 @@ class UserControllerTest {
 
         mockMvc.perform(get("/api/get-user/{id}", userId))
                 .andExpect(status().isNotFound());
+
+        when(userService.getUser(userId)).thenThrow(new RuntimeException());
+
+        mockMvc.perform(get("/api/get-user"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 
     @Test
@@ -123,6 +135,14 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.email").value(userDto.getEmail()))
                 .andExpect(jsonPath("$.phoneNo").value(userDto.getPhoneNo()))
                 .andExpect(jsonPath("$.password").value(userDto.getPassword()));
+
+        when(userService.createUser(any(UserDto.class))).thenThrow(new RuntimeException());
+
+        mockMvc.perform(post("/api/post-user")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(userDto)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 
     @Test
@@ -162,6 +182,14 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(userDto)))
                 .andExpect(status().isNotFound());
+
+        when(userService.updateUser(eq(userId), any(UserDto.class))).thenThrow(new RuntimeException());
+
+        mockMvc.perform(put("/api/put-user/{id}", userId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(userDto)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 
     @Test
@@ -177,5 +205,11 @@ class UserControllerTest {
 
         mockMvc.perform(delete("/api/delete-user/{id}", userId))
                 .andExpect(status().isNotFound());
+
+        when(userService.deleteUser(userId)).thenThrow(new RuntimeException());
+
+        mockMvc.perform(delete("/api/delete-user/{id}", userId))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 }

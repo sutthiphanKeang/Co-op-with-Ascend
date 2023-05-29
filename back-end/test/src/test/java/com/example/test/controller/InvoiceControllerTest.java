@@ -65,6 +65,12 @@ class InvoiceControllerTest {
         invoices.clear();
         mockMvc.perform(get("/api/get-invoice"))
                 .andExpect(status().isNoContent());
+
+        when(invoiceService.getInvoice()).thenThrow(new RuntimeException());
+
+        mockMvc.perform(get("/api/get-invoice"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 
     @Test
@@ -85,6 +91,12 @@ class InvoiceControllerTest {
 
         mockMvc.perform(get("/api/get-invoice/{id}", invoiceId))
                 .andExpect(status().isNotFound());
+
+        when(invoiceService.getInvoice(invoiceId)).thenThrow(new RuntimeException());
+
+        mockMvc.perform(get("/api/get-invoice/{id}", invoiceId))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 
     @Test
@@ -101,6 +113,12 @@ class InvoiceControllerTest {
 
         mockMvc.perform(post("/api/post-invoice/{id}", userId))
                 .andExpect(status().isNotFound());
+
+        when(invoiceService.createInvoice(userId)).thenThrow(new RuntimeException());
+
+        mockMvc.perform(post("/api/post-invoice/{id}", userId))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 
     @Test
@@ -127,6 +145,14 @@ class InvoiceControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(invoiceDto)))
                 .andExpect(status().isNotFound());
+
+        when(invoiceService.updateInvoice(eq(invoiceId), any(InvoiceDto.class))).thenThrow(new RuntimeException());
+
+        mockMvc.perform(put("/api/put-invoice/{id}", invoiceId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(invoiceDto)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 
     @Test
@@ -142,5 +168,11 @@ class InvoiceControllerTest {
 
         mockMvc.perform(delete("/api/delete-invoice/{id}", invoiceId))
                 .andExpect(status().isNotFound());
+
+        when(invoiceService.deleteInvoice(invoiceId)).thenThrow(new RuntimeException());
+
+        mockMvc.perform(delete("/api/delete-invoice/{id}", invoiceId))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 }

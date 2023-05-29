@@ -67,7 +67,7 @@ class CategoryControllerTest {
 
         mockMvc.perform(get("/api/get-category"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").exists())
+                .andExpect(jsonPath("$[0].id").value(category.getId().toString()))
                 .andExpect(jsonPath("$[0].unit").value(category.getUnit()))
                 .andExpect(jsonPath("$[0].product").value(category.getProduct()))
                 .andExpect(jsonPath("$[0].invoice").value(category.getInvoice()));
@@ -75,6 +75,12 @@ class CategoryControllerTest {
         categories.clear();
         mockMvc.perform(get("/api/get-category"))
                 .andExpect(status().isNoContent());
+
+        when(categoryService.getCategory()).thenThrow(new RuntimeException());
+
+        mockMvc.perform(get("/api/get-category"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 
     @Test
@@ -92,7 +98,7 @@ class CategoryControllerTest {
 
         mockMvc.perform(get("/api/get-category/{id}", categoryId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.id").value(category.getId().toString()))
                 .andExpect(jsonPath("$.unit").value(category.getUnit()))
                 .andExpect(jsonPath("$.product").value(category.getProduct()))
                 .andExpect(jsonPath("$.invoice").value(category.getInvoice()));
@@ -101,6 +107,12 @@ class CategoryControllerTest {
 
         mockMvc.perform(get("/api/get-category/{id}", categoryId))
                 .andExpect(status().isNotFound());
+
+        when(categoryService.getCategory(categoryId)).thenThrow(new RuntimeException());
+
+        mockMvc.perform(get("/api/get-category/{id}", categoryId))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 
     @Test
@@ -125,7 +137,7 @@ class CategoryControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(categoryDto)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.id").value(category.getId().toString()))
                 .andExpect(jsonPath("$.unit").value(category.getUnit()))
                 .andExpect(jsonPath("$.product").value(category.getProduct()))
                 .andExpect(jsonPath("$.invoice").value(category.getInvoice()));
@@ -136,6 +148,14 @@ class CategoryControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(categoryDto)))
                 .andExpect(status().isNotFound());
+
+        when(categoryService.createCategory(invoiceId, productId, categoryDto)).thenThrow(new RuntimeException());
+
+        mockMvc.perform(multipart("/api/post-category/{invoiceId}/{productId}", invoiceId, productId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(categoryDto)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 
     @Test
@@ -151,5 +171,11 @@ class CategoryControllerTest {
 
         mockMvc.perform(delete("/api/delete-category/{id}", categoryId))
                 .andExpect(status().isNotFound());
+
+        when(categoryService.deleteCategory(categoryId)).thenThrow(new RuntimeException());
+
+        mockMvc.perform(delete("/api/delete-category/{id}", categoryId))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 }

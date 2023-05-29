@@ -67,6 +67,12 @@ class ProductControllerTest {
         products.clear();
         mockMvc.perform(get("/api/get-product"))
                 .andExpect(status().isNoContent());
+
+        when(productService.getProduct()).thenThrow(new RuntimeException());
+
+        mockMvc.perform(get("/api/get-product"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 
     @Test
@@ -89,6 +95,12 @@ class ProductControllerTest {
 
         mockMvc.perform(get("/api/get-product/{id}", productId))
                 .andExpect(status().isNotFound());
+
+        when(productService.getProduct(productId)).thenThrow(new RuntimeException());
+
+        mockMvc.perform(get("/api/get-product/{id}", productId))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 
     @Test
@@ -111,6 +123,14 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.id").value(product.getId()))
                 .andExpect(jsonPath("$.name").value(product.getName()))
                 .andExpect(jsonPath("$.price").value(product.getPrice()));
+
+        when(productService.createProduct(any(ProductDto.class))).thenThrow(new RuntimeException());
+
+        mockMvc.perform(post("/api/post-product")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(productDto)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 
     @Test
@@ -141,6 +161,14 @@ class ProductControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(productDto)))
                 .andExpect(status().isNotFound());
+
+        when(productService.updateProduct(eq(productId), any(ProductDto.class))).thenThrow(new RuntimeException());
+
+        mockMvc.perform(put("/api/put-product/{id}", productId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(productDto)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 
     @Test
@@ -156,5 +184,11 @@ class ProductControllerTest {
 
         mockMvc.perform(delete("/api/delete-product/{id}", productId))
                 .andExpect(status().isNotFound());
+
+        when(productService.deleteProduct(productId)).thenThrow(new RuntimeException());
+
+        mockMvc.perform(delete("/api/delete-product/{id}", productId))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 }

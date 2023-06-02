@@ -1,0 +1,16 @@
+type User {
+    id: ID!
+    firstName: String!
+    lastName: String!
+    phoneNo: String!
+    email: String!
+    password: String!
+}
+
+input UserDto {
+    firstName: String!
+    lastName: String!
+    phoneNo: String!
+    email: String!
+    password: String!
+}

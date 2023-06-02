@@ -1,0 +1,10 @@
+type Query {
+    getAllUsers: [User!]!
+    getUserById(id: ID!): User
+}
+
+type Mutation {
+    createUser(userDto: UserDto!): User!
+    updateUser(id: ID!, userDto: UserDto!): User!
+    deleteUser(id: ID!): Boolean!
+}

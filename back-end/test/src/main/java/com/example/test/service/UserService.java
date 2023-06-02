@@ -1,5 +1,6 @@
 package com.example.test.service;
 
+import com.example.test.exception.ExceptionResolver;
 import com.example.test.mapper.UserDto;
 import com.example.test.model.User;
 import com.example.test.repository.UserRepository;
@@ -9,7 +10,9 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import javax.validation.ConstraintViolationException;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -25,7 +28,7 @@ public class UserService {
     }
 
     public User getUser(Long id) {
-        return userRepository.findById(id).orElse(null);
+        return userRepository.findById(id).orElseThrow(() -> new ExceptionResolver.NotFoundException("ID: " + id + " Not Found."));
     }
 
     public User createUser(UserDto userDto) {
@@ -39,7 +42,7 @@ public class UserService {
     }
 
     public User updateUser(Long id, UserDto userDto) {
-        User userData = userRepository.findById(id).orElse(null);
+        User userData = userRepository.findById(id).orElseThrow(() -> new ExceptionResolver.NotFoundException("ID: " + id + " Not Found."));
         if (ObjectUtils.isEmpty(userData)) {
             return userData;
         }
@@ -53,11 +56,12 @@ public class UserService {
     }
 
     public boolean deleteUser(Long id) {
-        try {
+        User userData = userRepository.findById(id).orElseThrow(() -> new ExceptionResolver.NotFoundException("ID: " + id + " Not Found."));
+        if (ObjectUtils.isEmpty(userData)) {
+            return false;
+        }else {
             userRepository.deleteById(id);
             return true;
-        } catch (EmptyResultDataAccessException e) {
-            return false;
         }
     }
 }

@@ -1,8 +1,8 @@
 package com.example.test.mapper;
 
 import com.example.test.model.Invoice;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -2,7 +2,7 @@ package com.example.test.mapper;
 
 import com.example.test.model.Category;
 import com.example.test.model.User;
-import jakarta.validation.constraints.Null;
+import javax.validation.constraints.Null;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

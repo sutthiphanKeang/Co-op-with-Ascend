@@ -1,6 +1,6 @@
 package com.example.test.model;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import lombok.*;
 
 import java.util.Set;

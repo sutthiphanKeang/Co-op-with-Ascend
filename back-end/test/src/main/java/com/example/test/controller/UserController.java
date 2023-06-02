@@ -4,7 +4,7 @@ import com.example.test.exception.GlobalExceptionHandler;
 import com.example.test.mapper.UserDto;
 import com.example.test.model.User;
 import com.example.test.service.UserService;
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

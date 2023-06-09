@@ -1,22 +1,41 @@
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import ReactDOM from "react-dom/client";
+import "./index.css";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
-import 'bootstrap/dist/css/bootstrap.min.css';
+import "bootstrap/dist/css/bootstrap.min.css";
 
-import './i18n/i18n'
-import React from 'react';
+import "./i18n/i18n";
+import React from "react";
+
+
+import {
+  ApolloClient,
+  InMemoryCache,
+  ApolloProvider,
+  HttpLink,
+} from "@apollo/client";
+
+const client = new ApolloClient({
+  link: new HttpLink({
+    uri: "http://localhost:8080/graphql",
+    fetchOptions: {
+      mode: "network-only",
+    },
+  }),
+  cache: new InMemoryCache(),
+});
 
 const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
+  document.getElementById("root") as HTMLElement
 );
 root.render(
   <BrowserRouter>
-  <React.Suspense fallback="loading">
-    <App />
-  </React.Suspense>
-    
+    <React.StrictMode>
+      <ApolloProvider client={client}>
+        <App />
+      </ApolloProvider>
+    </React.StrictMode>
   </BrowserRouter>
 );
 

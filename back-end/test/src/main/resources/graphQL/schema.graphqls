@@ -1,10 +1,35 @@
 type Query {
     getAllUsers: [User!]!
     getUserById(id: ID!): User
+    getUserByEmail(email: String!): User
+
+    getAllProducts: [Product!]!
+    getProductById(id: ID!): Product!
+
+    getAllInvoices: [Invoice!]!
+    getInvoiceById(id: ID!): Invoice!
+
+    getCategories: [Category!]!
+    getCategoryById(id: ID!): Category!
 }
 
 type Mutation {
     createUser(userDto: UserDto!): User!
     updateUser(id: ID!, userDto: UserDto!): User!
     deleteUser(id: ID!): Boolean!
+
+    createProduct(productDto: ProductDto!): Product!
+    updateProduct(id: ID!, productDto: ProductDto!): Product!
+    deleteProduct(id: ID!): Boolean!
+
+    createInvoice(userId: ID!): Invoice!
+    updateInvoice(id: ID!, invoiceDto: InvoiceDto!): Invoice!
+    deleteInvoice(id: ID!): Boolean!
+
+    createCategory(
+        invoiceId: ID!
+        productId: ID!
+        categoryDto: CategoryDto!
+    ): Category!
+    deleteCategory(id: ID!): Boolean!
 }

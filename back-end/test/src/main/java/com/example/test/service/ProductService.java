@@ -1,15 +1,15 @@
 package com.example.test.service;
 
+import com.example.test.exception.ExceptionResolver;
 import com.example.test.mapper.ProductDto;
 import com.example.test.model.Product;
 import com.example.test.repository.ProductRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ProductService {
@@ -24,8 +24,8 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    public Optional<Product> getProduct(Long id) {
-        return productRepository.findById(id);
+    public Product getProduct(Long id) {
+        return productRepository.findById(id).orElseThrow(() -> new ExceptionResolver.NotFoundException("ID: " + id + " Not Found."));
     }
 
     public Product createProduct(ProductDto productDto) {
@@ -35,23 +35,16 @@ public class ProductService {
         return productRepository.save(products);
     }
 
-    public Optional<Product> updateProduct(Long id, ProductDto productDto) {
-        Optional<Product> productData = productRepository.findById(id);
-        if (productData.isEmpty()) {
-            return productData;
-        }
-        Product products = productData.get();
-        products.setName(productDto.getName());
-        products.setPrice(productDto.getPrice());
-        return Optional.of(productRepository.save(products));
+    public Product updateProduct(Long id, ProductDto productDto) {
+        Product productData = productRepository.findById(id).orElseThrow(() -> new ExceptionResolver.NotFoundException("ID: " + id + " Not Found."));
+        productData.setName(productDto.getName());
+        productData.setPrice(productDto.getPrice());
+        return productRepository.save(productData);
     }
 
     public boolean deleteProduct(Long id) {
-        try {
-            productRepository.deleteById(id);
-            return true;
-        } catch (EmptyResultDataAccessException e) {
-            return false;
-        }
+        Product productData = productRepository.findById(id).orElseThrow(() -> new ExceptionResolver.NotFoundException("ID: " + id + " Not Found."));
+        productRepository.deleteById(productData.getId());
+        return true;
     }
 }

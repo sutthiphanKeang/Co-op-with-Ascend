@@ -1,5 +1,6 @@
 package com.example.test.service;
 
+import com.example.test.exception.ExceptionResolver;
 import com.example.test.mapper.ProductDto;
 import com.example.test.model.Product;
 import com.example.test.repository.ProductRepository;
@@ -57,17 +58,20 @@ class ProductServiceTest {
     @Test
     void testGetProductById() {
         long productId = 1L;
-        Product expectedProducts = new Product();
-        expectedProducts.setId(1L);
-        expectedProducts.setName("test");
-        expectedProducts.setPrice(1234);
+        Product expectedProduct = new Product();
+        expectedProduct.setId(1L);
+        expectedProduct.setName("test");
+        expectedProduct.setPrice(1234);
 
-        when(productRepository.findById(productId)).thenReturn(Optional.of(expectedProducts));
+        when(productRepository.findById(productId)).thenReturn(Optional.of(expectedProduct));
 
-        Optional<Product> actualProducts = productService.getProduct(productId);
+        Product actualProduct = productService.getProduct(productId);
 
-        Assertions.assertEquals(Optional.of(expectedProducts), actualProducts);
-        verify(productRepository, times(1)).findById(productId);
+        when(productRepository.findById(productId)).thenThrow(ExceptionResolver.NotFoundException.class);
+
+        Assertions.assertThrows(ExceptionResolver.NotFoundException.class, () -> productService.getProduct(productId));
+        Assertions.assertEquals(expectedProduct, actualProduct);
+        verify(productRepository, times(2)).findById(productId);
     }
 
     @Test
@@ -107,26 +111,32 @@ class ProductServiceTest {
         when(productRepository.findById(productId)).thenReturn(Optional.of(expectedProduct));
         when(productRepository.save(any(Product.class))).thenReturn(expectedProduct);
 
-        Optional<Product> actualProduct = productService.updateProduct(productId, productDto);
+        Product actualProduct = productService.updateProduct(productId, productDto);
 
-        Assertions.assertEquals(Optional.of(expectedProduct), actualProduct);
-        verify(productRepository, times(1)).findById(productId);
+        when(productRepository.findById(productId)).thenThrow(ExceptionResolver.NotFoundException.class);
+
+        Assertions.assertThrows(ExceptionResolver.NotFoundException.class, () -> productService.updateProduct(productId, productDto));
+        Assertions.assertEquals(expectedProduct, actualProduct);
+        verify(productRepository, times(2)).findById(productId);
         verify(productRepository, times(1)).save(expectedProduct);
     }
 
     @Test
     void testDeleteProduct() {
         long productId = 1L;
-        doNothing().when(productRepository).deleteById(productId);
+        Product expectedProducts = new Product();
+        expectedProducts.setId(1L);
+        expectedProducts.setName("test");
+        expectedProducts.setPrice(1234);
+
+        when(productRepository.findById(productId)).thenReturn(Optional.of(expectedProducts));
 
         boolean resultTrue = productService.deleteProduct(productId);
 
-        doThrow(EmptyResultDataAccessException.class).when(productRepository).deleteById(productId);
+        when(productRepository.findById(productId)).thenThrow(ExceptionResolver.NotFoundException.class);
 
-        boolean resultFalse = productService.deleteProduct(productId);
-
+        Assertions.assertThrows(ExceptionResolver.NotFoundException.class, () -> productService.deleteProduct(productId));
         Assertions.assertTrue(resultTrue);
-        Assertions.assertFalse(resultFalse);
-        verify(productRepository, times(2)).deleteById(productId);
+        verify(productRepository, times(1)).deleteById(productId);
     }
 }

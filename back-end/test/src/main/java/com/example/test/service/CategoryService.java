@@ -1,5 +1,6 @@
 package com.example.test.service;
 
+import com.example.test.exception.ExceptionResolver;
 import com.example.test.mapper.CategoryDto;
 import com.example.test.model.Category;
 import com.example.test.model.Invoice;
@@ -11,6 +12,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,29 +37,24 @@ public class CategoryService {
         return categoryRepository.findAll();
     }
 
-    public Optional<Category> getCategory(UUID id) {
-        return categoryRepository.findById(id);
+    public Category getCategory(UUID id) {
+        return categoryRepository.findById(id).orElseThrow(() -> new ExceptionResolver.NotFoundException("ID: " + id + " Not Found."));
     }
 
     public Category createCategory(Long invoiceId, Long productId, CategoryDto categoryDto) {
-        Optional<Product> product = productRepository.findById(productId);
-        Optional<Invoice> invoice = invoiceRepository.findById(invoiceId);
-        if (product.isEmpty() || invoice.isEmpty()) {
-            return null;
-        }
+        Product product = productRepository.findById(productId).orElseThrow(() -> new ExceptionResolver.NotFoundException("Product ID: " + productId + " Not Found."));
+        Invoice invoice = invoiceRepository.findById(invoiceId).orElseThrow(() -> new ExceptionResolver.NotFoundException("Invoice ID: " + invoiceId + " Not Found."));
         Category category = modelMapper.map(categoryDto, Category.class);
         category.setUnit(categoryDto.getUnit());
-        category.setProduct(product.get());
-        category.setInvoice(invoice.get());
+        category.setProduct(product);
+        category.setInvoice(invoice);
         return categoryRepository.save(category);
     }
 
     public boolean deleteCategory(UUID id) {
-        try {
-            categoryRepository.deleteById(id);
-            return true;
-        } catch (EmptyResultDataAccessException e) {
-            return false;
-        }
+        Category categoryData = categoryRepository.findById(id).orElseThrow(() -> new ExceptionResolver.NotFoundException("ID: " + id + " Not Found."));
+        categoryRepository.deleteById(categoryData.getId());
+        return true;
+
     }
 }

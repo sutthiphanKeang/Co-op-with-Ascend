@@ -1,5 +1,6 @@
 package com.example.test.service;
 
+import com.example.test.exception.ExceptionResolver;
 import com.example.test.mapper.InvoiceDto;
 import com.example.test.model.Invoice;
 import com.example.test.model.User;
@@ -69,18 +70,23 @@ class InvoiceServiceTest {
 
         when(invoiceRepository.findById(invoiceId)).thenReturn(Optional.of(expectedInvoice));
 
-        Optional<Invoice> actualInvoice = invoiceService.getInvoice(invoiceId);
+        Invoice actualInvoice = invoiceService.getInvoice(invoiceId);
 
-        Assertions.assertEquals(Optional.of(expectedInvoice), actualInvoice);
-        verify(invoiceRepository, times(1)).findById(invoiceId);
+        when(invoiceRepository.findById(invoiceId)).thenThrow(ExceptionResolver.NotFoundException.class);
+
+        Assertions.assertThrows(ExceptionResolver.NotFoundException.class, () -> invoiceService.getInvoice(invoiceId));
+        Assertions.assertEquals(expectedInvoice, actualInvoice);
+        verify(invoiceRepository, times(2)).findById(invoiceId);
     }
 
     @Test
     void testCreateInvoice() {
         Long userId = 1L;
         User user = new User();
+        user.setId(userId);
         Invoice expectedInvoice = new Invoice();
         expectedInvoice.setUser(user);
+        expectedInvoice.setStatus(Boolean.FALSE);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(invoiceRepository.save(any(Invoice.class))).thenReturn(expectedInvoice);
@@ -108,25 +114,30 @@ class InvoiceServiceTest {
 
         Invoice actualInvoice = invoiceService.updateInvoice(invoiceId, invoiceDto);
 
+        when(invoiceRepository.findById(invoiceId)).thenThrow(ExceptionResolver.NotFoundException.class);
+
+        Assertions.assertThrows(ExceptionResolver.NotFoundException.class, () -> invoiceService.updateInvoice(invoiceId, invoiceDto));
         Assertions.assertEquals(expectedInvoice, actualInvoice);
         Assertions.assertEquals(invoiceDto.getStatus(), expectedInvoice.getStatus());
-        verify(invoiceRepository, times(1)).findById(invoiceId);
+        verify(invoiceRepository, times(2)).findById(invoiceId);
         verify(invoiceRepository, times(1)).save(expectedInvoice);
     }
 
     @Test
     void testDeleteInvoice() {
         Long invoiceId = 1L;
-        doNothing().when(invoiceRepository).deleteById(invoiceId);
+        User user = new User();
+        Invoice expectedInvoice = new Invoice();
+        expectedInvoice.setUser(user);
+        expectedInvoice.setStatus(Boolean.TRUE);
+
+        when(invoiceRepository.findById(invoiceId)).thenReturn(Optional.of(expectedInvoice));
 
         boolean resultTrue = invoiceService.deleteInvoice(invoiceId);
 
-        doThrow(EmptyResultDataAccessException.class).when(invoiceRepository).deleteById(invoiceId);
+        when(invoiceRepository.findById(invoiceId)).thenThrow(ExceptionResolver.NotFoundException.class);
 
-        boolean resultFalse = invoiceService.deleteInvoice(invoiceId);
-
+        Assertions.assertThrows(ExceptionResolver.NotFoundException.class, () -> invoiceService.deleteInvoice(invoiceId));
         Assertions.assertTrue(resultTrue);
-        Assertions.assertFalse(resultFalse);
-        verify(invoiceRepository, times(2)).deleteById(invoiceId);
     }
 }

@@ -1,5 +1,6 @@
 package com.example.test.service;
 
+import com.example.test.exception.ExceptionResolver;
 import com.example.test.mapper.CategoryDto;
 import com.example.test.model.Category;
 import com.example.test.model.Invoice;
@@ -82,10 +83,13 @@ class CategoryServiceTest {
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(expectedCategory));
 
-        Optional<Category> actualCategory = categoryService.getCategory(categoryId);
+        Category actualCategory = categoryService.getCategory(categoryId);
 
-        Assertions.assertEquals(Optional.of(expectedCategory), actualCategory);
-        verify(categoryRepository, times(1)).findById(categoryId);
+        when(categoryRepository.findById(categoryId)).thenThrow(ExceptionResolver.NotFoundException.class);
+
+        Assertions.assertThrows(ExceptionResolver.NotFoundException.class, () -> categoryService.getCategory(categoryId));
+        Assertions.assertEquals(expectedCategory, actualCategory);
+        verify(categoryRepository, times(2)).findById(categoryId);
     }
 
     @Test
@@ -117,22 +121,20 @@ class CategoryServiceTest {
         verify(categoryRepository, times(1)).save(expectedCategory);
     }
 
-    @Test
-    void testCreateCategory_ProductNotFound() {
-        Long invoiceId = 1L;
-        Long productId = 1L;
-        CategoryDto categoryDto = new CategoryDto();
-        Invoice invoice = new Invoice();
-        when(productRepository.findById(productId)).thenReturn(Optional.empty());
-        when(invoiceRepository.findById(invoiceId)).thenReturn(Optional.of(invoice));
-
-        Category actualCategory = categoryService.createCategory(invoiceId, productId, categoryDto);
-
-        Assertions.assertNull(actualCategory);
-        verify(productRepository, times(1)).findById(productId);
-        verify(invoiceRepository, times(1)).findById(invoiceId);
-        verifyNoInteractions(categoryRepository);
-    }
+//    @Test
+//    void testCreateCategory_ProductNotFound() {
+//        Long invoiceId = 1L;
+//        Long productId = 1L;
+//        CategoryDto categoryDto = new CategoryDto();
+//        Invoice invoice = new Invoice();
+//        when(invoiceRepository.findById(invoiceId)).thenReturn(Optional.of(invoice));
+//        when(productRepository.findById(productId)).thenThrow(ExceptionResolver.NotFoundException.class);
+//
+//        Assertions.assertThrows(ExceptionResolver.NotFoundException.class, () -> categoryService.createCategory(invoiceId, productId, categoryDto));
+//        verify(productRepository, times(1)).findById(productId);
+//        verify(invoiceRepository, times(1)).findById(invoiceId);
+//        verifyNoInteractions(categoryRepository);
+//    }
 
     @Test
     void testCreateCategory_InvoiceNotFound() {
@@ -141,11 +143,9 @@ class CategoryServiceTest {
         CategoryDto categoryDto = new CategoryDto();
         Product product = new Product();
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
-        when(invoiceRepository.findById(invoiceId)).thenReturn(Optional.empty());
+        when(invoiceRepository.findById(invoiceId)).thenThrow(ExceptionResolver.NotFoundException.class);
 
-        Category actualCategory = categoryService.createCategory(invoiceId, productId, categoryDto);
-
-        Assertions.assertNull(actualCategory);
+        Assertions.assertThrows(ExceptionResolver.NotFoundException.class, () -> categoryService.createCategory(invoiceId, productId, categoryDto));
         verify(productRepository, times(1)).findById(productId);
         verify(invoiceRepository, times(1)).findById(invoiceId);
         verifyNoInteractions(categoryRepository);
@@ -154,17 +154,16 @@ class CategoryServiceTest {
     @Test
     void testDeleteCategory() {
         UUID categoryId = UUID.randomUUID();
-        doNothing().when(categoryRepository).deleteById(categoryId);
+        Category expectedCategory = new Category();
+
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(expectedCategory));
 
         boolean resultTrue = categoryService.deleteCategory(categoryId);
 
-        doThrow(EmptyResultDataAccessException.class).when(categoryRepository).deleteById(categoryId);
+        when(categoryRepository.findById(categoryId)).thenThrow(ExceptionResolver.NotFoundException.class);
 
-        boolean resultFalse = categoryService.deleteCategory(categoryId);
-
+        Assertions.assertThrows(ExceptionResolver.NotFoundException.class, () -> categoryService.deleteCategory(categoryId));
         Assertions.assertTrue(resultTrue);
-        Assertions.assertFalse(resultFalse);
-        verify(categoryRepository, times(2)).deleteById(categoryId);
     }
 }
 

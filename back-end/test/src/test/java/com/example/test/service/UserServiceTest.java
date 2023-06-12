@@ -1,5 +1,6 @@
 package com.example.test.service;
 
+import com.example.test.exception.ExceptionResolver;
 import com.example.test.mapper.UserDto;
 import com.example.test.model.User;
 import com.example.test.repository.UserRepository;
@@ -68,8 +69,11 @@ class UserServiceTest {
 
         User actualUser = userService.getUser(userId);
 
+        when(userRepository.findById(userId)).thenThrow(ExceptionResolver.NotFoundException.class);
+
+        Assertions.assertThrows(ExceptionResolver.NotFoundException.class, () -> userService.getUser(userId));
         Assertions.assertEquals(expectedUser, actualUser);
-        verify(userRepository, times(1)).findById(userId);
+        verify(userRepository, times(2)).findById(userId);
     }
 
     @Test
@@ -126,32 +130,36 @@ class UserServiceTest {
         expectedUser.setPassword(userDto.getPassword());
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
-        when(modelMapper.map(userDto, User.class)).thenReturn(expectedUser);
         when(userRepository.save(any(User.class))).thenReturn(expectedUser);
 
         User actualUser = userService.updateUser(userId, userDto);
 
+        when(userRepository.findById(userId)).thenThrow(ExceptionResolver.NotFoundException.class);
+
+        Assertions.assertThrows(ExceptionResolver.NotFoundException.class, () -> userService.updateUser(userId, userDto));
         Assertions.assertEquals(expectedUser, actualUser);
-        verify(userRepository, times(1)).findById(userId);
-        verify(modelMapper, times(1)).map(userDto, User.class);
+        verify(userRepository, times(2)).findById(userId);
         verify(userRepository, times(1)).save(expectedUser);
     }
 
     @Test
     void testDeleteUser() {
         Long userId = 1L;
+        User expectedUser = new User();
+        expectedUser.setId(userId);
+        expectedUser.setFirstName("keang");
+        expectedUser.setLastName("55555");
+        expectedUser.setEmail("test@test.com");
 
-        doNothing().when(userRepository).deleteById(userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(expectedUser));
 
         boolean resultTrue = userService.deleteUser(userId);
 
-        doThrow(new EmptyResultDataAccessException(1)).when(userRepository).deleteById(userId);
+        when(userRepository.findById(userId)).thenThrow(ExceptionResolver.NotFoundException.class);
 
-        boolean resultFalse = userService.deleteUser(userId);
-
+        Assertions.assertThrows(ExceptionResolver.NotFoundException.class, () -> userService.deleteUser(userId));
         Assertions.assertTrue(resultTrue);
-        Assertions.assertFalse(resultFalse);
-        verify(userRepository, times(2)).deleteById(userId);
+        verify(userRepository, times(1)).deleteById(userId);
     }
 
 }

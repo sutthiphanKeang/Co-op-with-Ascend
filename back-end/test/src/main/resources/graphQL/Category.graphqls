@@ -1,0 +1,10 @@
+type Category {
+    id: ID!
+    unit: Int!
+    product: Product!
+    invoice: Invoice!
+}
+
+input CategoryDto {
+    unit: Int!
+}

@@ -19,6 +19,18 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.graphql</groupId>
+			<artifactId>spring-graphql-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.graphql-java-kickstart/graphql-spring-boot-starter-test -->
+		<dependency>
+			<groupId>com.graphql-java-kickstart</groupId>
+			<artifactId>graphql-spring-boot-starter-test</artifactId>
+			<version>11.1.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.graphql</groupId>
 			<artifactId>spring-graphql</artifactId>
 		</dependency>
 		<dependency>
@@ -33,15 +45,17 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-graphql</artifactId>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.graphql-java/graphql-java-tools -->
 		<dependency>
-			<groupId>com.graphql-java-kickstart</groupId>
+			<groupId>com.graphql-java</groupId>
 			<artifactId>graphql-java-tools</artifactId>
-			<version>12.0.0</version>
+			<version>5.2.4</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.graphql-java/graphql-spring-boot-starter -->
 		<dependency>
-			<groupId>com.graphql-java-kickstart</groupId>
+			<groupId>com.graphql-java</groupId>
 			<artifactId>graphql-spring-boot-starter</artifactId>
-			<version>12.0.0</version>
+			<version>5.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

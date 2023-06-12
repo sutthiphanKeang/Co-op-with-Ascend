@@ -1,0 +1,9 @@
+type Invoice {
+    id: ID!
+    user: User!
+    status: Boolean!
+}
+
+input InvoiceDto {
+    status: Boolean!
+}

@@ -14,7 +14,6 @@
 //import org.springframework.web.bind.annotation.*;
 //
 //import java.util.List;
-//import java.util.Optional;
 //
 //@RestController
 //@RequestMapping("/api")
@@ -40,21 +39,21 @@
 //        }
 //    }
 //
-//    @GetMapping("/get-invoice/{id}")
-//    public ResponseEntity<Invoice> getInvoiceById(@PathVariable("id") long id) {
-//        try {
-//            Optional<Invoice> invoiceData = invoiceService.getInvoice(id);
-//            if (invoiceData.isPresent()) {
-//                return new ResponseEntity<>(invoiceData.get(), HttpStatus.OK);
-//            } else {
-//                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//            }
-//
-//        } catch (Exception e) {
-//            logger.error("An error occurred while getting the invoice: {}", e.getMessage());
-//            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
+////    @GetMapping("/get-invoice/{id}")
+////    public ResponseEntity<Invoice> getInvoiceById(@PathVariable("id") long id) {
+////        try {
+////            Invoice invoiceData = invoiceService.getInvoice(id);
+////            if (ObjectUtils.isEmpty(invoiceData)) {
+////                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+////            } else {
+////                return new ResponseEntity<>(invoiceData, HttpStatus.OK);
+////            }
+////
+////        } catch (Exception e) {
+////            logger.error("An error occurred while getting the invoice: {}", e.getMessage());
+////            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+////        }
+////    }
 //
 //    @PostMapping("/post-invoice/{useId}")
 //    public ResponseEntity<Invoice> createInvoice(@Valid @PathVariable("useId") Long userId) {

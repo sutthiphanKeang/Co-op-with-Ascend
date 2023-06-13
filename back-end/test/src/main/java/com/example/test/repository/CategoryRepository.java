@@ -8,6 +8,6 @@ import java.util.UUID;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, UUID>{
-    List<Category> findByProduct(Long product_id);
-    List<Category> findByInvoice(Long invoice_id);
+    List<Category> findByProductId(Long productId);
+    List<Category> findByInvoiceId(Long invoiceId);
 }

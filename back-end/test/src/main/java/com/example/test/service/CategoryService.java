@@ -10,12 +10,10 @@ import com.example.test.repository.InvoiceRepository;
 import com.example.test.repository.ProductRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -39,6 +37,22 @@ public class CategoryService {
 
     public Category getCategory(UUID id) {
         return categoryRepository.findById(id).orElseThrow(() -> new ExceptionResolver.NotFoundException("ID: " + id + " Not Found."));
+    }
+
+    public List<Category> getCategoryByProduct(long id) {
+        List<Category> categoryData = categoryRepository.findByProductId(id);
+        if(ObjectUtils.isEmpty(categoryData)){
+            throw new ExceptionResolver.NotFoundException("Product ID: " + id + " Not Found.");
+        }
+        return categoryData;
+    }
+
+    public List<Category> getCategoryByInvoice(long id) {
+        List<Category> categoryData = categoryRepository.findByInvoiceId(id);
+        if(ObjectUtils.isEmpty(categoryData)){
+            throw new ExceptionResolver.NotFoundException("Invoice ID: " + id + " Not Found.");
+        }
+        return categoryData;
     }
 
     public Category createCategory(Long invoiceId, Long productId, CategoryDto categoryDto) {

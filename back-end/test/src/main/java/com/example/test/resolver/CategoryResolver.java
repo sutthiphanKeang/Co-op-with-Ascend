@@ -39,6 +39,16 @@ public class CategoryResolver {
         return categoryService.getCategory(id);
     }
 
+    @QueryMapping
+    public List<Category> getCategoryByProductId(@Argument("id") long id) {
+        return categoryService.getCategoryByProduct(id);
+    }
+
+    @QueryMapping
+    public List<Category> getCategoryByInvoiceId(@Argument("id") long id) {
+        return categoryService.getCategoryByInvoice(id);
+    }
+
     @MutationMapping
     public Category createCategory(@Valid @Argument("invoiceId") long invoiceId, @Argument("productId") long productId, @Argument CategoryDto categoryDto) {
         return categoryService.createCategory(invoiceId, productId, categoryDto);

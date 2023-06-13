@@ -34,8 +34,18 @@ public class InvoiceResolver {
     }
 
     @QueryMapping
-    public Invoice getInvoiceById(@Argument("id") long id) {
+    public Invoice getInvoiceById(@Argument("id") Long id) {
         return invoiceService.getInvoice(id);
+    }
+
+    @QueryMapping
+    public List<Invoice> getInvoiceByUserId(@Argument("id") long id) {
+        return invoiceService.getInvoice(id);
+    }
+
+    @QueryMapping
+    public List<Invoice> getInvoiceByUserEmail(@Argument("email") String email) {
+        return invoiceService.getInvoiceEmail(email);
     }
 
     @MutationMapping

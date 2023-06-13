@@ -18,6 +18,7 @@
 //
 //@RestController
 //@RequestMapping("/api")
+//@CrossOrigin
 //@ControllerAdvice(basePackageClasses = GlobalExceptionHandler.class)
 //public class UserController {
 //
@@ -26,19 +27,20 @@
 //    UserService userService;
 //
 //    @GetMapping("/get-user")
-//    public ResponseEntity<List<User>> getAllUser() {
-//        try {
-//            List<User> userData = userService.getUser();
-//            if (ObjectUtils.isEmpty(userData)) {
-//                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//            }
-//            else {
-//                return new ResponseEntity<>(userData, HttpStatus.OK);
-//            }
-//        } catch (Exception e) {
-//            logger.error("An error occurred while getting all of the user: {}", e.getMessage());
-//            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
+//    public List<User> getAllUser() {
+////        try {
+////            List<User> userData = userService.getUser();
+////            if (ObjectUtils.isEmpty(userData)) {
+////                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+////            }
+////            else {
+////                return new ResponseEntity<>(userData, HttpStatus.OK);
+////            }
+////        } catch (Exception e) {
+////            logger.error("An error occurred while getting all of the user: {}", e.getMessage());
+////            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+////        }
+//        return userService.getUser();
 //    }
 //
 //    @GetMapping("/get-user/{id}")

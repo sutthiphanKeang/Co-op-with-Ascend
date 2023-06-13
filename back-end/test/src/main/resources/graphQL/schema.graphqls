@@ -8,9 +8,13 @@ type Query {
 
     getAllInvoices: [Invoice!]!
     getInvoiceById(id: ID!): Invoice!
+    getInvoiceByUserId(id: ID!): [Invoice!]!
+    getInvoiceByUserEmail(email: String!): [Invoice!]!
 
     getCategories: [Category!]!
     getCategoryById(id: ID!): Category!
+    getCategoryByProductId(id: ID!): [Category!]!
+    getCategoryByInvoiceId(id: ID!): [Category!]!
 }
 
 type Mutation {

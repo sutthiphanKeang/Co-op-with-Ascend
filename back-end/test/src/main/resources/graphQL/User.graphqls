@@ -1,5 +1,6 @@
 type User {
     id: ID!
+    invoice: Invoice
     firstName: String!
     lastName: String!
     phoneNo: String!

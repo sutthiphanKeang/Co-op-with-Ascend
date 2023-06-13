@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class InvoiceService {
@@ -26,6 +27,22 @@ public class InvoiceService {
 
     public Invoice getInvoice(Long id) {
         return invoiceRepository.findById(id).orElseThrow(() -> new ExceptionResolver.NotFoundException("ID: " + id + " Not Found."));
+    }
+
+    public List<Invoice> getInvoice(long  id) {
+        List<Invoice> invoiceData = invoiceRepository.findByUserId(id);
+        if(ObjectUtils.isEmpty(invoiceData)){
+            throw new ExceptionResolver.NotFoundException("ID: " + id + " Not Found.");
+        }
+        return invoiceData;
+    }
+
+    public List<Invoice> getInvoiceEmail(String  email) {
+        List<Invoice> invoiceData = invoiceRepository.findByUserEmail(email);
+        if(ObjectUtils.isEmpty(invoiceData)){
+            throw new ExceptionResolver.NotFoundException("Email: " + email + " Not Found.");
+        }
+        return invoiceData;
     }
 
     public Invoice createInvoice(Long userId) {

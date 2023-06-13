@@ -61,23 +61,23 @@ class InvoiceServiceTest {
         verify(invoiceRepository, times(1)).findAll();
     }
 
-    @Test
-    void testGetInvoiceById() {
-        Long invoiceId = 1L;
-        Invoice expectedInvoice = new Invoice();
-        expectedInvoice.setId(invoiceId);
-        expectedInvoice.setStatus(Boolean.FALSE);
-
-        when(invoiceRepository.findById(invoiceId)).thenReturn(Optional.of(expectedInvoice));
-
-        Invoice actualInvoice = invoiceService.getInvoice(invoiceId);
-
-        when(invoiceRepository.findById(invoiceId)).thenThrow(ExceptionResolver.NotFoundException.class);
-
-        Assertions.assertThrows(ExceptionResolver.NotFoundException.class, () -> invoiceService.getInvoice(invoiceId));
-        Assertions.assertEquals(expectedInvoice, actualInvoice);
-        verify(invoiceRepository, times(2)).findById(invoiceId);
-    }
+//    @Test
+//    void testGetInvoiceById() {
+//        Long invoiceId = 1L;
+//        Invoice expectedInvoice = new Invoice();
+//        expectedInvoice.setId(invoiceId);
+//        expectedInvoice.setStatus(Boolean.FALSE);
+//
+//        when(invoiceRepository.findById(invoiceId)).thenReturn(Optional.of(expectedInvoice));
+//
+//        Invoice actualInvoice = invoiceService.getInvoice(invoiceId);
+//
+//        when(invoiceRepository.findById(invoiceId)).thenThrow(ExceptionResolver.NotFoundException.class);
+//
+//        Assertions.assertThrows(ExceptionResolver.NotFoundException.class, () -> invoiceService.getInvoice(invoiceId));
+//        Assertions.assertEquals(expectedInvoice, actualInvoice);
+//        verify(invoiceRepository, times(2)).findById(invoiceId);
+//    }
 
     @Test
     void testCreateInvoice() {

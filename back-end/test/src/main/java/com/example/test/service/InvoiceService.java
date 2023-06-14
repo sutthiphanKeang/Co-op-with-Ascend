@@ -53,6 +53,14 @@ public class InvoiceService {
         return invoiceRepository.save(invoice);
     }
 
+    public Invoice createInvoice(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ExceptionResolver.NotFoundException("User Email: " + email + " Not Found."));
+        Invoice invoice = new Invoice();
+        invoice.setUser(user);
+        invoice.setStatus(false);
+        return invoiceRepository.save(invoice);
+    }
+
     public Invoice updateInvoice(Long id, InvoiceDto invoiceDto) {
         Invoice invoiceData = invoiceRepository.findById(id).orElseThrow(() -> new ExceptionResolver.NotFoundException("ID: " + id + " Not Found."));
         invoiceData.setStatus(invoiceDto.getStatus());

@@ -54,6 +54,11 @@ public class InvoiceResolver {
     }
 
     @MutationMapping
+    public Invoice createInvoiceEmail(@Argument("email") String email) {
+        return invoiceService.createInvoice(email);
+    }
+
+    @MutationMapping
     public Invoice updateInvoice(@Valid @Argument("id") long id, @Argument InvoiceDto invoiceDto) {
         return invoiceService.updateInvoice(id, invoiceDto);
     }

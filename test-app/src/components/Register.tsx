@@ -87,13 +87,6 @@ function Register() {
     }
   };
 
-  // const myhandleSubmit = (values: State) => {
-  //   console.log(values);
-  //   // setValues(values);
-  //   alert("Register Succeed");
-  //   localStorage.setItem("user", JSON.stringify(values));
-  //   navigate("/Login");
-  // };
 
   return (
     <Formik
@@ -107,6 +100,8 @@ function Register() {
         password: "",
         terms: false,
       }}
+      validateOnChange={false}
+      validateOnBlur={false}
     >
       {({
         handleSubmit,

@@ -3,14 +3,13 @@ import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import NavDropdown from "react-bootstrap/NavDropdown";
-
+import { useCookies } from "react-cookie";
 import { useTranslation} from "react-i18next";
 
 type props = {
   onLoginuser: boolean;
   setonLoginuser: (a: boolean) => void;
 };
-
 
 
 const lngs = {
@@ -22,6 +21,7 @@ function NavbarUser({ onLoginuser, setonLoginuser }: props) {
   //i18n
   const{t, i18n} = useTranslation();
 
+  const[token, setToken, removeCookie] = useCookies(['email', 'id']);
 
   return (
     <Navbar collapseOnSelect expand="lg" bg="primary" variant="dark">
@@ -41,10 +41,13 @@ function NavbarUser({ onLoginuser, setonLoginuser }: props) {
         {onLoginuser && (
           <>
             <Nav.Link href="User">{t('Account')}</Nav.Link>
+            <Nav.Link href="Shop">{t('Shop')}</Nav.Link>
             <Nav.Link
               href="Login"
               onClick={() => {
                 setonLoginuser(false);
+                removeCookie('email',{path:'/'});
+                removeCookie('id',{path:'/'});
                 alert("Logout Succeed");
               }}
             >

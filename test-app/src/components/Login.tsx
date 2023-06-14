@@ -2,14 +2,10 @@ import React, { useEffect, useState } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { useQuery} from "@apollo/client";
-
-// import {userLogin} from "../graphql/queries.graphql"
-
+import { useQuery, gql } from "@apollo/client";
+import { useCookies } from "react-cookie";
 //i18n
 import { useTranslation } from "react-i18next";
-import { on } from "events";
-import { gql } from '@apollo/client';
 
 ////
 interface State {
@@ -17,9 +13,9 @@ interface State {
   password: string;
 }
 
-
-const userLogin = gql(/* GraphQL */`
-query getAllUsers{
+const userLogin = gql`
+  query getUserByEmail($email: String!) {
+    getUserByEmail(email: $email) {
       id
       firstName
       lastName
@@ -27,21 +23,44 @@ query getAllUsers{
       email
       password
     }
-`);
+  }
+`;
 
 function Login() {
   //i18n
   const { t } = useTranslation();
   ///
 
-  const { loading, error, data } = useQuery(userLogin);
-
-  useEffect(() => {
-    console.log(data)
-  },[data])
   const navigate = useNavigate();
 
+  const [cookies, setCookie] = useCookies(["email","id"]);
+
+
+  const isCookieExpired = () => {
+    try {
+      const cookieExpiration = new Date(cookies.email.expires);
+      const currentDate = new Date();
+      if (currentDate > cookieExpiration) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (ReferenceError) {
+      return true;
+    }
+  };
+
+  console.log(isCookieExpired());
   const [onLoginuser, setonLoginuser] = useOutletContext<any>();
+
+  useEffect(() => {
+    if (!isCookieExpired()) {
+      navigate("/User");
+      setonLoginuser(true);
+    }
+  }, []);
+
+  
 
   const [values, setValues] = React.useState<State>({
     email: "",
@@ -53,23 +72,34 @@ function Login() {
       setValues({ ...values, [prop]: event.target.value });
     };
 
-  const[submit, setSubmit] = useState(false);
-  const handleSubmit = (event: { preventDefault: () => void; }) => {
-    event.preventDefault();
-    // console.log(data);
-    // console.log(error?.message);
-    // if (error) {
-    //   if (values.email === data.email && values.password === data.password) {
-    //     alert("Login Succeed");
-    //     setonLoginuser(true);
-    //     navigate("/User");
-    //   } else {
-    //     alert("Please check your information again.");
-    //   }
-    // } else {
-    //   alert(`Please login again! it's have Error! ${error}`);
-    // }
+  const email = values.email;
+  const { loading, error, data } = useQuery(userLogin, {
+    variables: { email },
+  });
 
+  const handleSubmit = (event: { preventDefault: () => void }) => {
+    event.preventDefault();
+
+    const expirationDate = new Date();
+    expirationDate.setTime(expirationDate.getTime() + 60 * 60 * 1000);
+
+    console.log(data);
+    if (data) {
+      if (
+        values.email === data.getUserByEmail.email &&
+        values.password === data.getUserByEmail.password
+      ) {
+        alert("Login Succeed");
+        setonLoginuser(true);
+        setCookie("email", email, { path: "/", expires: expirationDate });
+        setCookie("id", data.getUserByEmail.id, { path: "/", expires: expirationDate });
+        navigate("/User");
+      } else {
+        alert("Please check your information again.");
+      }
+    } else {
+      alert(`Please login again! it's have Error! ${error}`);
+    }
   };
 
   return (

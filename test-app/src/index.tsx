@@ -4,10 +4,9 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-
+import { CookiesProvider } from "react-cookie";
 import "./i18n/i18n";
 import React from "react";
-
 
 import {
   ApolloClient,
@@ -17,12 +16,7 @@ import {
 } from "@apollo/client";
 
 const client = new ApolloClient({
-  link: new HttpLink({
-    uri: "http://localhost:8080/graphql",
-    fetchOptions: {
-      mode: "network-only",
-    },
-  }),
+  uri: "http://localhost:8080/graphql",
   cache: new InMemoryCache(),
 });
 
@@ -32,9 +26,11 @@ const root = ReactDOM.createRoot(
 root.render(
   <BrowserRouter>
     <React.StrictMode>
-      <ApolloProvider client={client}>
-        <App />
-      </ApolloProvider>
+      <CookiesProvider>
+        <ApolloProvider client={client}>
+          <App />
+        </ApolloProvider>
+      </CookiesProvider>
     </React.StrictMode>
   </BrowserRouter>
 );

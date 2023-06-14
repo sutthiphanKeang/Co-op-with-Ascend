@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Stack from "react-bootstrap/Stack";
@@ -7,10 +7,14 @@ import Card from "react-bootstrap/Card";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 
+import { useQuery, gql } from "@apollo/client";
+import { useOutletContext } from "react-router-dom";
+
 interface State {
   name: string;
 }
 function Home() {
+
   const [Seach, setSeach] = useState({ name: "" });
 
   const reset = () => {
@@ -24,6 +28,25 @@ function Home() {
   let jsonObj = JSON.parse(data_);
 
   const [image, setImage] = useState("");
+
+  // const query = gql(`
+  //     query {getAllUsers{
+  //           id
+  //           firstName
+  //           lastName
+  //           phoneNo
+  //           email
+  //           password
+  //         }
+  //       }`);
+  // const { loading, error, data: queryData } = useQuery(query);
+
+  // useEffect(() => {
+  //   if (queryData) {
+  //     console.log(queryData);
+  //   }
+  // }, [queryData]);
+
   const handleSubmit = () => {
     axios({
       method: "GET",
@@ -54,6 +77,22 @@ function Home() {
         alert("Name of Pokemon Incorrect");
         console.error("found error name", error);
       });
+
+      
+
+  // axios({
+  //     method: "GET",
+  //     url: `http://localhost:8080/api/get-user/1`,
+  //   })
+  //     .then((response) => {
+  //       return response.data;
+  //     })
+  //     .then((data) => {
+  //       console.log("graphql", data)
+  //     })
+  //     .catch((error) => {
+  //       console.error("found error name", error);
+  //     });
   };
 
   const handleChange =

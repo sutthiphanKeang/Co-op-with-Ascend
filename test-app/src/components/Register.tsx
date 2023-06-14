@@ -4,6 +4,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
+import { useMutation, useQuery, gql } from "@apollo/client";
 
 //yup and formik
 import * as yup from "yup";
@@ -42,6 +43,18 @@ function Register() {
   const { t } = useTranslation();
   ///
 
+  const createUser = gql`
+  mutation CreateUser($userDto: UserDto!) {
+    createUser(userDto: $userDto) {
+      id
+      firstName
+      lastName
+      phoneNo
+      email
+    }
+  }
+`;
+
   const [values, setValues] = useState({
     fname: "",
     lname: "",
@@ -50,40 +63,37 @@ function Register() {
     password: "",
     terms: false,
   });
-  // const handleChange = (prop: keyof State) => (event: React.ChangeEvent<any>): void => {
-  //     setValues({ ...values, [prop]: event.target.value });
-  //   };
+
   const navigate = useNavigate();
+  const [createUserMutation] = useMutation(createUser);
 
-  // const handleChange = (e: React.ChangeEvent<any>): void;
-  //   <T = string | React.ChangeEvent<any>>(field: T): T extends React.ChangeEvent<any> ? void : (e: string | React.ChangeEvent<any>) => void;
-  //   };
+  const myhandleSubmit = async (values: State) => {
+    try {
+      setValues(values);
+      const userInput = {
+        firstName: values.fname,
+        lastName: values.lname,
+        phoneNo: values.phone,
+        email: values.email,
+        password: values.password
+      };
 
-  // const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-  //   const form = e.currentTarget;
-  //   if (form.checkValidity() === false) {
-  //     e.preventDefault();
-  //     console.log('จะร้องไห้',form);
-  //     alert("5555");
-  //     e.stopPropagation();
-  //   }else{
-  //     e.preventDefault();
-  //     setValidated(true);
-  //     alert("Register Succeed");
-  //     var nameValue = form.getElementById("fname").value;
-  //     console.log('จะร้องไห้',nameValue);
-  //     // localStorage.setItem("user", JSON.stringify(values));
-  //     // navigate("/Login");
-  //   }
-  // };
-
-  const myhandleSubmit = (values: State) => {
-    console.log(values);
-    // setValues(values);
-    alert("Register Succeed");
-    localStorage.setItem("user", JSON.stringify(values));
-    navigate("/Login");
+      const { data } = await createUserMutation({ variables: { userDto: userInput } });
+      console.log(data.createUser); // Access the created user data
+      alert("Register Succeed");
+      navigate("/Login");
+    } catch (error) {
+      console.error(error);
+    }
   };
+
+  // const myhandleSubmit = (values: State) => {
+  //   console.log(values);
+  //   // setValues(values);
+  //   alert("Register Succeed");
+  //   localStorage.setItem("user", JSON.stringify(values));
+  //   navigate("/Login");
+  // };
 
   return (
     <Formik

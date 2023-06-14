@@ -1,13 +1,28 @@
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
-
-import Container from "react-bootstrap/Container";
-
+import { useCookies } from "react-cookie";
 import Navbar from "./Navbar";
 import Card from 'react-bootstrap/Card';
 function MainLayout() {
+
+  const [cookies, setCookie] = useCookies(["email"]);
+
+  const isCookieExpired = () => {
+    try {
+      const cookieExpiration = new Date(cookies.email.expires);
+      const currentDate = new Date();
+      if (currentDate > cookieExpiration) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (ReferenceError) {
+      return true;
+    }
+  };
+
   const [onLoginuser, setonLoginuser] = useState(
-    false
+    !isCookieExpired()
   );
   return (
     <div>

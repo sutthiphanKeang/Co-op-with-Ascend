@@ -11,6 +11,7 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import User from "./components/User";
 import FirstHome from "./components/FirstHome";
+import Shop from "./components/Shop";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="Login" element={<Login/>}/>
         <Route path="Register" element={<Register/>}/>
         <Route path="User" element={<User/>}/>
+        <Route path="Shop" element={<Shop/>}/>
       </Route>
     </Routes>
   );

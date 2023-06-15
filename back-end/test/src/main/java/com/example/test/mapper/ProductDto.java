@@ -15,7 +15,6 @@ import java.util.Set;
 @AllArgsConstructor
 public class ProductDto {
     private Long id;
-    private Set<Category> categories;
 
     @NotBlank(message = "Name cannot be blank")
     private String name;

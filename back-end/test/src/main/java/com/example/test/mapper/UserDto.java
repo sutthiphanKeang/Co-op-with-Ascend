@@ -13,10 +13,6 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDto {
-
-    private Long id;
-    private Set<Invoice> invoices;
-
     @NotEmpty(message = "First name is required")
     private String firstName;
 

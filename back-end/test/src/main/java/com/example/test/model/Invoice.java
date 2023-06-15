@@ -1,21 +1,20 @@
 package com.example.test.model;
 
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import javax.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
-import java.util.List;
+import javax.persistence.*;
 import java.util.Set;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Invoice", schema = "dbo", catalog = "test")
+@Table(name = "Invoice", schema = "dbo", catalog = "system")
 public class Invoice {
 
     @Id
@@ -23,14 +22,11 @@ public class Invoice {
     @Column(name = "id")
     private Long id;
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "user_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
-
-    @OneToMany(mappedBy = "invoice")
-    private Set<Category> categories;
 
     @Column(name = "status")
     private Boolean status;
-
 }

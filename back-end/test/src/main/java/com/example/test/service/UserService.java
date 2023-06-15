@@ -38,7 +38,7 @@ public class UserService {
 
     public User createUser(UserDto userDto) {
         Optional<User> userData = userRepository.findByEmail(userDto.getEmail());
-        if(ObjectUtils.isEmpty(userData)){
+        if (ObjectUtils.isEmpty(userData)) {
             User user = modelMapper.map(userDto, User.class);
             user.setFirstName(userDto.getFirstName());
             user.setLastName(userDto.getLastName());

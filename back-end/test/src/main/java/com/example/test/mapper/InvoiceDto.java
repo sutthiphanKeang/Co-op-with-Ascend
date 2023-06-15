@@ -15,7 +15,6 @@ import java.util.Set;
 public class InvoiceDto {
     private Long id;
     private User userId;
-    private Set<Category> categories;
 
     @Null(message = "Status must be null during creation")
     private Boolean status;
